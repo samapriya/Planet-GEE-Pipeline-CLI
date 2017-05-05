@@ -1,4 +1,7 @@
 # Planet GEE Pipeline CLI
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.572128.svg)](https://doi.org/10.5281/zenodo.572128)
+
 While moving between assets from Planet Inc and Google Earth Engine it was imperative to create a pipeline that allows for easy transitions between the two service end points and this tool is designed to act as a step by step process chain from Planet Assets to batch upload and modification within the Google Earth Engine environment. The ambition is apart from helping user with batch actions on assets along with interacting and extending capabilities of existing GEE CLI. It is developed case by case basis to include more features in the future as it becomes available or as need arises. tab.
 
 ![CLI](http://i.imgur.com/5AJjiFa.gif)
@@ -32,10 +35,16 @@ While moving between assets from Planet Inc and Google Earth Engine it was imper
 	* [Cancel all tasks](#cancel-all-tasks)
 
 ## Installation
-We assume Earth Engine Python API is installed and EE authorised as desribed [here](https://developers.google.com/earth-engine/python_install). To install:
+We assume Earth Engine Python API is installed and EE authorised as desribed [here](https://developers.google.com/earth-engine/python_install). We also assume Planet Python API is installed you can install by simply running 
 ```
-git clone https://github.com/samapriya/gee_asset_manager_addon
-cd gee_asset_manager && pip install .
+pip install planet
+```
+Further instructions can be found [here](https://www.planet.com/docs/api-quickstart-examples/cli/) 
+
+To install:
+```
+git clone https://github.com/samapriya/Planet-GEE-Pipeline-CLI.git
+cd Planet-GEE-Pipeline-CLI && pip install .
 ```
 
 Installation is an optional step; the application can be also run
