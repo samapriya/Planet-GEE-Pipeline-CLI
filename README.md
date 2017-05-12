@@ -66,11 +66,11 @@ As usual, to print help:
 Planet Pipeline with Google Earth Engine Batch Addons
 
 positional arguments:
-  { ,planet_key,aoijson,activatepl,downloadpl,metadata,ee_user,upload,delete,tasks,taskquery,report,cancel,mover,copy,access,collprop,convert2ft,cleanout}
+  { ,planetkey,aoijson,activatepl,downloadpl,metadata,ee_user,upload,delete,tasks,taskquery,report,cancel,mover,copy,access,collprop,convert2ft,cleanout}
                         ---------------------------------------
                         -----Choose from Planet Tools Below-----
                         ---------------------------------------
-    planet_key          Enter your planet API Key
+    planetkey           Enter your planet API Key
     aoijson             Tool to convert KML, Shapefile,WKT,GeoJSON or Landsat
                         WRS PathRow file to AreaOfInterest.JSON file with
                         structured query for use with Planet API 1.0
@@ -183,7 +183,7 @@ The Planet Toolsets consists of tools required to access control and download pl
 ### Planet Key
 This tool basically asks you to input your Planet API Key using a password prompt this is then used for all subsequent tools
 ```
-usage: ppipe.py planet_key [-h]
+usage: ppipe.py planetkey [-h]
 
 optional arguments:
   -h, --help  show this help message and exit

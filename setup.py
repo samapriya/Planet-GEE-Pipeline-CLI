@@ -6,7 +6,7 @@ def readme():
 
 setup(
     name='ppipe',
-    version='0.1.1',
+    version='0.1.2',
     packages=find_packages(),
     package_data={'ppipe': ['logconfig.json']},
     url='https://github.com/samapriya/Planet-GEE-Pipeline-CLI',
