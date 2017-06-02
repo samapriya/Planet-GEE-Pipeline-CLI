@@ -43,7 +43,15 @@ pip install planet
 ```
 Further instructions can be found [here](https://www.planet.com/docs/api-quickstart-examples/cli/) 
 
-To install:
+This toolbox also uses some functionality from GDAL
+For installing GDAL in Ubuntu
+```
+sudo add-apt-repository ppa:ubuntugis/ppa && sudo apt-get update
+sudo apt-get install gdal-bin
+```
+For Windows I found this [guide](https://sandbox.idre.ucla.edu/sandbox/tutorials/installing-gdal-for-windows) from UCLA
+
+To install toolbox:
 ```
 git clone https://github.com/samapriya/Planet-GEE-Pipeline-CLI.git
 cd Planet-GEE-Pipeline-CLI && pip install .
