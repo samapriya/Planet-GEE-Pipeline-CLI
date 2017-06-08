@@ -6,10 +6,10 @@ def readme():
 
 setup(
     name='ppipe',
-    version='0.1.2',
+    version='0.1.4',
     packages=find_packages(),
-    package_data={'ppipe': ['logconfig.json']},
-    url='https://github.com/samapriya/Planet-GEE-Pipeline-CLI',
+    package_data={'ppipe': ['logconfig.json','wrs_grid.csv']},
+    url='https://github.com/samapriya/Planet-GEE-Pipeline',
     license='Apache 2.0',
     classifiers=(
         'Development Status :: 3 - Alpha',

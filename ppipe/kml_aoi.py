@@ -21,6 +21,7 @@ def main():
     parser.add_argument('--end', help='End date in YYYY-MM-DD?')
     parser.add_argument('--cloud', help='Maximum Cloud Cover(0-1) representing 0-100')
     parser.add_argument('--geo', default='./map.geojson',help='map.geojson/aoi.kml/aoi.shp/aoi.wkt file')
+    parser.add_argument('--loc',help='Output location for kml file')
     args = parser.parse_args()
     sys.stdout.write(str(parsed(args)))
         
@@ -33,16 +34,16 @@ def parsed(args):
                 for feat in kml_lyr:
                     outfile=feat.ExportToJson()
                     geom2=str(outfile).replace(", 0.0",'')
-                    with open(r'./kmlout.geojson','w') as csvfile:
+                    with open(args.loc+'./kmlout.geojson','w') as csvfile:
                         writer=csv.writer(csvfile)
                         writer.writerow([geom2])
         kml2geojson(args.geo)
-        raw= open('./kmlout.geojson')
+        raw= open(args.loc+'./kmlout.geojson')
         for line in raw:
             fields=line.strip().split(":")[3]
             f2=fields.strip().split("}")[0]
             filenames = p1+f2+p2+str(args.start)+p3+str(args.end)+p4+p5+str(args.cloud)+p6
-        with open('./aoi.json', 'w') as outfile:
+        with open(args.loc+'./aoi.json', 'w') as outfile:
             outfile.write(filenames)
             outfile.close()
 if __name__ == '__main__':
