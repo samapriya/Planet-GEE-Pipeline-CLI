@@ -50,8 +50,8 @@ cd Planet-GEE-Pipeline-CLI && pip install .
 ```
 
 Installation is an optional step; the application can be also run
-directly by executing geeadd.py script. The advantage of having it
-installed is being able to execute geeadd as any command line tool. I
+directly by executing ppipe.py script. The advantage of having it
+installed is being able to execute ppipe as any command line tool. I
 recommend installation within virtual environment. To install run
 ```
 python setup.py develop or python setup.py install
@@ -111,9 +111,9 @@ optional arguments:
 ```
 
 To obtain help for a specific functionality, simply call it with _help_
-switch, e.g.: `geeadd upload -h`. If you didn't install geeadd, then you
-can run it just by going to _geeadd_ directory and running `python
-geeadd.py [arguments go here]`
+switch, e.g.: `ppipe upload -h`. If you didn't install ppipe, then you
+can run it just by going to _ppipe_ directory and running `python
+ppipe.py [arguments go here]`
 
 ## Batch uploader
 The script creates an Image Collection from GeoTIFFs in your local
@@ -126,7 +126,7 @@ for images, which is covered in the next section:
 
 
 ```
-usage: geeadd.py upload [-h] -u USER --source SOURCE --dest DEST [-m METADATA]
+usage: ppipe.py upload [-h] -u USER --source SOURCE --dest DEST [-m METADATA]
                         [--large] [--nodata NODATA]
 
 optional arguments:
@@ -268,58 +268,58 @@ This tool is designed to allow different users to change earth engine authentica
 
 ### Upload a directory with images to your myfolder/mycollection and associate properties with each image:
 ```
-geeadd upload -u johndoe@gmail.com --source path_to_directory_with_tif -m path_to_metadata.csv --dest users/johndoe/myfolder/myponycollection
+ppipe upload -u johndoe@gmail.com --source path_to_directory_with_tif -m path_to_metadata.csv --dest users/johndoe/myfolder/myponycollection
 ```
 The script will prompt the user for Google account password. The program will also check that all properties in path_to_metadata.csv do not contain any illegal characters for GEE. Don't need metadata? Simply skip this option.
 
 ### Upload a directory with images with specific NoData value to a selected destination 
 ```
-geeadd upload -u johndoe@gmail.com --source path_to_directory_with_tif --dest users/johndoe/myfolder/myponycollection --nodata 222
+ppipe upload -u johndoe@gmail.com --source path_to_directory_with_tif --dest users/johndoe/myfolder/myponycollection --nodata 222
 ```
 In this case we need to supply full path to the destination, which is helpful when we upload to a shared folder. In the provided example we also burn value 222 into all rasters for missing data (NoData).
 
 ### Task Query
 This script counts all currently running and ready tasks along with failed tasks.
 ```
-usage: geeadd.py tasks [-h]
+usage: ppipe.py tasks [-h]
 
 optional arguments:
   -h, --help  show this help message and exit
 
-geeadd.py tasks
+ppipe.py tasks
 ```
 
 ### Task Query during ingestion
 This script can be used intermittently to look at running, failed and ready(waiting) tasks during ingestion. This script is a special case using query tasks only when uploading assets to collection by providing collection pathway to see how collection size increases.
 ```
-usage: geeadd.py taskquery [-h] [--destination DESTINATION]
+usage: ppipe.py taskquery [-h] [--destination DESTINATION]
 
 optional arguments:
   -h, --help            show this help message and exit
   --destination DESTINATION
                         Full path to asset where you are uploading files
 
-geeadd.py taskquery "users/johndoe/myfolder/myponycollection"						
+ppipe.py taskquery "users/johndoe/myfolder/myponycollection"						
 ```
 
 	
 ### Task Report
 Sometimes it is important to generate a report based on all tasks that is running or has finished. Generated report includes taskId, data time, task status and type
 ```
-usage: geeadd.py report [-h] [--r R] [--e E]
+usage: ppipe.py report [-h] [--r R] [--e E]
 
 optional arguments:
   -h, --help  show this help message and exit
   --r R       Path & CSV filename where the report will be saved
   --e E       Path & CSV filename where the errorlog will be saved
 
-geeadd.py report --r "report.csv" --e "errorlog.csv"
+ppipe.py report --r "report.csv" --e "errorlog.csv"
 ```
 ### Delete a collection with content:
 
 The delete is recursive, meaning it will delete also all children assets: images, collections and folders. Use with caution!
 ```
-geeadd delete users/johndoe/test
+ppipe delete users/johndoe/test
 ```
 
 Console output:
@@ -333,13 +333,13 @@ Console output:
 ### Delete all directories / collections based on a Unix-like pattern
 
 ```
-geeadd delete users/johndoe/*weird[0-9]?name*
+ppipe delete users/johndoe/*weird[0-9]?name*
 ```
 
 ### Assets Move
 This script allows us to recursively move assets from one collection to the other.
 ```
-usage: geeadd.py mover [-h] [--assetpath ASSETPATH] [--finalpath FINALPATH]
+usage: ppipe.py mover [-h] [--assetpath ASSETPATH] [--finalpath FINALPATH]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -347,25 +347,25 @@ optional arguments:
                         Existing path of assets
   --finalpath FINALPATH
                         New path for assets
-geeadd.py mover --assetpath "users/johndoe/myfolder/myponycollection" --destination "users/johndoe/myfolder/myotherponycollection"					
+ppipe.py mover --assetpath "users/johndoe/myfolder/myponycollection" --destination "users/johndoe/myfolder/myotherponycollection"					
 ```
 
 ### Assets Copy
 This script allows us to recursively copy assets from one collection to the other. If you have read acess to assets from another user this will also allow you to copy assets from their collections.
 ```
-usage: geeadd.py copy [-h] [--initial INITIAL] [--final FINAL]
+usage: ppipe.py copy [-h] [--initial INITIAL] [--final FINAL]
 
 optional arguments:
   -h, --help         show this help message and exit
   --initial INITIAL  Existing path of assets
   --final FINAL      New path for assets
-geeadd.py mover --initial "users/johndoe/myfolder/myponycollection" --final "users/johndoe/myfolder/myotherponycollection"					
+ppipe.py mover --initial "users/johndoe/myfolder/myponycollection" --final "users/johndoe/myfolder/myotherponycollection"					
 ```
 
 ### Assets Access
 This tool allows you to set asset acess for either folder , collection or image recursively meaning you can add collection access properties for multiple assets at the same time.
 ```
-usage: geeadd access [-h] --mode MODE --asset ASSET --user USER
+usage: ppipe access [-h] --mode MODE --asset ASSET --user USER
 
 optional arguments:
   -h, --help     show this help message and exit
@@ -376,13 +376,13 @@ optional arguments:
   --user USER    This is the email address to whom you want to give read or
                  write permission Usage: "john@doe.com:R" or "john@doe.com:W"
                  R/W refers to read or write permission
-geeadd.py access --mode folder --asset "folder/collection/image" --user "john@doe.com:R"
+ppipe.py access --mode folder --asset "folder/collection/image" --user "john@doe.com:R"
 ```
 
 ### Set Collection Property
 This script is derived from the ee tool to set collection properties and will set overall properties for collection. 
 ```
-usage: geeadd.py collprop [-h] [--coll COLL] [--p P]
+usage: ppipe.py collprop [-h] [--coll COLL] [--p P]
 
 optional arguments:
   -h, --help   show this help message and exit
@@ -395,7 +395,7 @@ optional arguments:
 ### Convert to Fusion Table
 Once validated with gdal and google fusion table it can be used to convert any geoObject to google fusion table. Forked and contributed by Gennadii [here](https://github.com/gena/ogr2ft). The scripts can be used only with a specific google account
 ```
-usage: geeadd.py convert2ft [-h] --i I --o O [--add_missing]
+usage: ppipe.py convert2ft [-h] --i I --o O [--add_missing]
 
 optional arguments:
   -h, --help     show this help message and exit
@@ -403,19 +403,19 @@ optional arguments:
   --o O          output Fusion Table name
   --add_missing  add missing features from the last inserted feature index
 
-geeadd.py convert2ft --i "./aoi.kml" --o "converted_aoi"
+ppipe.py convert2ft --i "./aoi.kml" --o "converted_aoi"
 ```
 
 ### Cleanup Utility
 This script is used to clean folders once all processes have been completed. In short this is a function to clear folder on local machine.
 ```
-usage: geeadd.py cleanout [-h] [--dirpath DIRPATH]
+usage: ppipe.py cleanout [-h] [--dirpath DIRPATH]
 
 optional arguments:
   -h, --help         show this help message and exit
   --dirpath DIRPATH  Folder you want to delete after all processes have been
                      completed
-geeadd.py cleanout --dirpath "./folder"
+ppipe.py cleanout --dirpath "./folder"
 ```
 
 ### Cancel all tasks
@@ -424,7 +424,7 @@ This is a simpler tool, can be called directly from the earthengine cli as well
 earthengine cli command
 earthengine task cancel all
 
-usage: geeadd.py cancel [-h]
+usage: ppipe.py cancel [-h]
 
 optional arguments:
   -h, --help  show this help message and exit
