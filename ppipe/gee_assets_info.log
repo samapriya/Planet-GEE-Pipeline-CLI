@@ -1,8 +1,0 @@
-2017-06-08 12:27:47,917 :: oauth2client.transport :: INFO :: Attempting refresh to obtain initial access_token
-2017-06-08 12:27:47,917 :: oauth2client.client :: INFO :: Refreshing access_token
-2017-06-08 12:28:25,092 :: oauth2client.transport :: INFO :: Attempting refresh to obtain initial access_token
-2017-06-08 12:28:25,092 :: oauth2client.client :: INFO :: Refreshing access_token
-2017-06-08 12:29:16,198 :: root :: WARNING :: Collection users/samapriya/dgbuffer already exists
-2017-06-08 12:29:17,378 :: root :: INFO :: Processing image 1 out of 3: C:\planet_demo\ps\229190_1552719_2016-08-26_0c78_analytic.tif
-2017-06-08 12:33:00,344 :: root :: INFO :: Processing image 2 out of 3: C:\planet_demo\ps\229190_1552818_2016-08-26_0c78_analytic.tif
-2017-06-08 12:36:19,427 :: root :: INFO :: Processing image 3 out of 3: C:\planet_demo\ps\229190_1552820_2016-08-26_0c78_analytic.tif

@@ -45,16 +45,15 @@ def activatepl_from_parser(args):
     action_planet=str(args.action)
     asset_type=str(args.asst)
     try:
-        os.system("download.py --query "+args.aoi+" --"+args.action+" "+asset_type)
+        os.system("python ./download.py --query "+args.aoi+" --"+args.action+" "+asset_type)
     except Exception:
         print(' ')
 def downloadpl_from_parser(args):
     aoi_json=str(args.aoi)
-    action_planet=str(args.action)
     planet_pathway=str(args.pathway)
     asset_type=str(args.asst)
     try:
-        os.system("download.py --query "+args.aoi+" --"+args.action+" "+args.pathway+" "+asset_type)
+        os.system("python ./download.py --query "+args.aoi+" --download"+" "+args.pathway+" "+asset_type)
     except Exception:
         print(' ')
         
@@ -93,7 +92,7 @@ def access_from_parser(args):
 def cleanout_from_parser(args):
     cleanout(args.dirpath)
 def tasks():
-    tasklist=subprocess.check_output("earthengine task list")
+    tasklist=subprocess.check_output("earthengine task list",shell=True)
     taskready=tasklist.count("READY")
     taskrunning=tasklist.count("RUNNING")
     taskfailed=tasklist.count("FAILED")
@@ -138,7 +137,6 @@ def main(args=None):
 
     parser_downloadpl=subparsers.add_parser('downloadpl',help='Tool to download Planet Assets')
     parser_downloadpl.add_argument('--aoi', help='Choose aoi.json file created earlier')
-    parser_downloadpl.add_argument('--action', help='choose download')
     parser_downloadpl.add_argument('--asst',help='Choose between planet asset types or for Metadata follow by _xml Eg: PSOrthoTile analytic_xml--->Assets Include:(PSOrthoTile analytic/PSOrthoTile analytic_dn/PSOrthoTile visual/PSScene4Band analytic/PSScene4Band analytic_dn/PSScene3Band analytic/PSScene3Band analytic_dn/PSScene3Band visual/REOrthoTile analytic/REOrthoTile visual')
     parser_downloadpl.add_argument('--pathway',help='Folder Pathways where PlanetAssets are saved exampled ./PlanetScope ./RapidEye')
     parser_downloadpl.set_defaults(func=downloadpl_from_parser)

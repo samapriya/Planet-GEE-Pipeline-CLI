@@ -1,8 +1,6 @@
 # Planet GEE Pipeline CLI
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.572128.svg)](https://doi.org/10.5281/zenodo.572128)
-[![JetStream](https://img.shields.io/badge/SupportedBy%3A-JetStream-brightgreen.svg)](https://jetstream-cloud.org/)
-[![Planet](https://img.shields.io/badge/SupportedBy%3A-Planet%20Ambassador%20Program-brightgreen.svg)](https://www.planet.com/products/education-and-research/)
 
 While moving between assets from Planet Inc and Google Earth Engine it was imperative to create a pipeline that allows for easy transitions between the two service end points and this tool is designed to act as a step by step process chain from Planet Assets to batch upload and modification within the Google Earth Engine environment. The ambition is apart from helping user with batch actions on assets along with interacting and extending capabilities of existing GEE CLI. It is developed case by case basis to include more features in the future as it becomes available or as need arises. tab.
 
@@ -43,15 +41,7 @@ pip install planet
 ```
 Further instructions can be found [here](https://www.planet.com/docs/api-quickstart-examples/cli/) 
 
-This toolbox also uses some functionality from GDAL
-For installing GDAL in Ubuntu
-```
-sudo add-apt-repository ppa:ubuntugis/ppa && sudo apt-get update
-sudo apt-get install gdal-bin
-```
-For Windows I found this [guide](https://sandbox.idre.ucla.edu/sandbox/tutorials/installing-gdal-for-windows) from UCLA
-
-To install toolbox:
+To install:
 ```
 git clone https://github.com/samapriya/Planet-GEE-Pipeline-CLI.git
 cd Planet-GEE-Pipeline-CLI && pip install .
