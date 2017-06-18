@@ -38,7 +38,7 @@ While moving between assets from Planet Inc and Google Earth Engine it was imper
 	* [Cancel all tasks](#cancel-all-tasks)
 
 ## Installation
-We assume Earth Engine Python API is installed and EE authorised as desribed [here](https://developers.google.com/earth-engine/python_install). We also assume Planet Python API is installed you can install by simply running 
+We assume Earth Engine Python API is installed and EE authorised as desribed [here](https://developers.google.com/earth-engine/python_install). We also assume Planet Python API is installed you can install by simply running.
 ```
 pip install planet
 ```
@@ -49,18 +49,22 @@ To install:
 git clone https://github.com/samapriya/Planet-GEE-Pipeline-CLI.git
 cd Planet-GEE-Pipeline-CLI && pip install .
 ```
-
-Installation is an optional step; the application can be also run
-directly by executing ppipe.py script. The advantage of having it
-installed is being able to execute ppipe as any command line tool. I
-recommend installation within virtual environment. To install run
+This release also contains a windows installer which bypasses the need for you to have admin permission, it does however require you to have python in the system path meaning when you open up command prompt you should be able to type python and start it within the command prompt window. Post installation using the installer you can just call ppipe using the command prompt similar to calling python. Give it a go post installation type
+ 
+Installation is an optional step; the application can be also run directly by executing ppipe.py script. The advantage of having it installed is being able to execute ppipe as any command line tool. I recommend installation within virtual environment. To install run
 ```
 python setup.py develop or python setup.py install
 
 In a linux distribution
 sudo python setup.py develop or sudo python setup.py install
 ```
-
+This toolbox also uses some functionality from GDAL
+For installing GDAL in Ubuntu
+```
+sudo add-apt-repository ppa:ubuntugis/ppa && sudo apt-get update
+sudo apt-get install gdal-bin
+```
+For Windows I found this [guide](https://sandbox.idre.ucla.edu/sandbox/tutorials/installing-gdal-for-windows) from UCLA
 
 ## Getting started
 
