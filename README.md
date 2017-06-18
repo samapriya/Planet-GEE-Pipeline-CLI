@@ -22,6 +22,7 @@ While moving between assets from Planet Inc and Google Earth Engine it was imper
     * [Metadata Parser](#metadata-parser)
 * [Earth Engine Tools](#earth-engine-tools)
 	* [EE User](#ee-user)
+	* [Create](#create)
     * [Upload a directory with images and associate properties with each image:](#upload-a-directory-with-images-and-associate-properties-with-each-image)
 	* [Upload a directory with images with specific NoData value to a selected destination:](#upload-a-directory-with-images-with-specific-nodata-value-to-a-selected-destination)
 	* [Task Query](#task-query)
@@ -65,10 +66,15 @@ sudo python setup.py develop or sudo python setup.py install
 
 As usual, to print help:
 ```
+usage: ppipe.py [-h]
+                {
+                ,planetkey,aoijson,activatepl,downloadpl,metadata,ee_user,create,upload,lst,delete,tasks,taskquery,report,cancel,mover,copy,access,collprop,convert2ft,cleanout}
+                ...
+
 Planet Pipeline with Google Earth Engine Batch Addons
 
 positional arguments:
-  { ,planetkey,aoijson,activatepl,downloadpl,metadata,ee_user,upload,delete,tasks,taskquery,report,cancel,mover,copy,access,collprop,convert2ft,cleanout}
+  { ,planetkey,aoijson,activatepl,downloadpl,metadata,ee_user,create,upload,lst,delete,tasks,taskquery,report,cancel,mover,copy,access,collprop,convert2ft,cleanout}
                         ---------------------------------------
                         -----Choose from Planet Tools Below-----
                         ---------------------------------------
@@ -85,7 +91,11 @@ positional arguments:
                         -------------------------------------------
     ee_user             Get Earth Engine API Key & Paste it back to Command
                         line/shell to change user
+    create              Allows the user to create an asset collection or
+                        folder in Google Earth Engine
     upload              Batch Asset Uploader to Earth Engine.
+    lst                 List assets in a folder/collection or write as text
+                        file
     delete              Deletes collection and all items inside. Supports
                         Unix-like wildcards.
     tasks               Queries currently running, enqued,failed
@@ -197,7 +207,7 @@ If using on a private machine the Key is saved as a csv file for all future runs
 The aoijson tab within the toolset allows you to create filters and structure your existing input file to that which can be used with Planet's API. The tool requires inputs with start and end date, along with cloud cover. You can choose from multiple input files types such as KML, Zipped Shapefile, GeoJSON, WKT or even Landsat Tiles based on PathRow numbers. The geo option asks you to select existing files which will be converted into formatted JSON file called aoi.json. If using WRS as an option just type in the 6 digit PathRow combination and it will create a json file for you.
 ```
 usage: ppipe.py aoijson [-h] [--start START] [--end END] [--cloud CLOUD]
-                        [--inputfile INPUTFILE] [--geo GEO]
+                     [--inputfile INPUTFILE] [--geo GEO] [--loc LOC]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -209,6 +219,7 @@ optional arguments:
                         AOI(KML/SHP/GJSON/WKT) or WRS (6 digit RowPath
                         Example: 023042)
   --geo GEO             map.geojson/aoi.kml/aoi.shp/aoi.wkt file
+  --loc LOC             Location where aoi.json file is to be stored
 ```
 
 ### Activate or Check Asset
@@ -245,26 +256,42 @@ optional arguments:
 ```
 
 ### Metadata Parser
-The metadata tab is a more powerful tool and consists of metadata parsing for PlanetScope OrthoTile RapiEye OrthoTile along with Digital Globe MultiSpectral and DigitalGlobe PanChromatic datasets. This was developed as a standalone to process xml metadata files from multiple sources and is important step is the user plans to upload these assets to Google Earth Engine. The combine Planet-GEE Pipeline tool will be made available soon for testing.
+The metadata tab is a more powerful tool and consists of metadata parsing for All PlanetScope and RapiEye Assets along with Digital Globe MultiSpectral and DigitalGlobe PanChromatic datasets. This was developed as a standalone to process xml metadata files from multiple sources and is important step is the user plans to upload these assets to Google Earth Engine. 
+
 ```
 usage: ppipe.py metadata [-h] [--asset ASSET] [--mf MF] [--mfile MFILE]
-                         [--errorlog ERRORLOG]
+                      [--errorlog ERRORLOG]
 
 optional arguments:
   -h, --help           show this help message and exit
-  --asset ASSET        Choose RapidEye/PlantScope/DigitalGlobe
-                       MultiSpectral/DigitalGlobe Panchromatic
-                       (RE/PS/DGMS/DGP)?
+  --asset ASSET        Choose PS OrthoTile(PSO)|PS OrthoTile DN(PSO_DN)|PS
+                       OrthoTile Visual(PSO_V)|PS4Band Analytic(PS4B)|PS4Band
+                       DN(PS4B_DN)|PS3Band Analytic(PS3B)|PS3Band
+                       DN(PS3B_DN)|PS3Band Visual(PS3B_V)|RE OrthoTile
+                       (REO)|RE OrthoTile Visual(REO_V)|DigitalGlobe
+                       MultiSpectral(DGMS)|DigitalGlobe Panchromatic(DGP)?
   --mf MF              Metadata folder?
   --mfile MFILE        Metadata filename to be exported along with Path.csv
   --errorlog ERRORLOG  Errorlog to be exported along with Path.csv
 ```
 
-##Earth Engine Tools
+## Earth Engine Tools
 The ambition is apart from helping user with batch actions on assets along with interacting and extending capabilities of existing GEE CLI. It is developed case by case basis to include more features in the future as it becomes available or as need arises. This is also a seperate package for earth engine users to use and can be downloaded [here](https://github.com/samapriya/gee_asset_manager_addon)
 
 ### EE User
 This tool is designed to allow different users to change earth engine authentication credentials. The tool invokes the authentication call and copies the authentication key verification website to the clipboard which can then be pasted onto a browser and the generated key can be pasted back
+
+### Create
+This tool allows you to create a collection or folder in your earth engine root directory. The tool uses the system cli to achieve this and this has been included so as to reduce the need to switch between multiple tools and CLI.
+```
+usage: ppipe.py create [-h] --typ TYP --path PATH
+
+optional arguments:
+  -h, --help   show this help message and exit
+  --typ TYP    Specify type: collection or folder
+  --path PATH  This is the path for the earth engine asset to be created full
+               path is needsed eg: users/johndoe/collection
+```			   
 
 ### Upload a directory with images to your myfolder/mycollection and associate properties with each image:
 ```

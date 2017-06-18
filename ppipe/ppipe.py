@@ -35,6 +35,12 @@ def ee_auth_entry():
     print("Paste authorization link already copied to your clipboard & paste back key")
 def ee_user_from_parser(args):
     ee_auth_entry()
+    
+def create_from_parser(args):
+    typ=str(args.typ)
+    ee_path=str(args.path)
+    os.system("earthengine create "+typ+" "+ee_path)
+    
 def aoijson_from_parser(args):
     aoijson(start=args.start,end=args.end,cloud=args.cloud,inputfile=args.inputfile,geo=args.geo,loc=args.loc)
 def metadata_from_parser(args):
@@ -154,6 +160,11 @@ def main(args=None):
 
     parser_ee_user = subparsers.add_parser('ee_user', help='Get Earth Engine API Key & Paste it back to Command line/shell to change user')
     parser_ee_user.set_defaults(func=ee_user_from_parser)
+    
+    parser_create = subparsers.add_parser('create',help='Allows the user to create an asset collection or folder in Google Earth Engine')
+    parser_create.add_argument('--typ', help='Specify type: collection or folder', required=True)
+    parser_create.add_argument('--path', help='This is the path for the earth engine asset to be created full path is needsed eg: users/johndoe/collection', required=True)
+    parser_create.set_defaults(func=create_from_parser)
     
     parser_upload = subparsers.add_parser('upload', help='Batch Asset Uploader to Earth Engine.')
     required_named = parser_upload.add_argument_group('Required named arguments.')
