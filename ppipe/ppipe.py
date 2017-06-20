@@ -7,7 +7,10 @@ import ee
 import subprocess
 import getpass
 import csv
-
+from ee import oauth
+import re
+import time
+import clipboard
 from batch_copy import copy
 from batch_remover import delete
 from batch_uploader import upload
@@ -31,11 +34,18 @@ def planet_key_entry():
 def planet_key_from_parser(args):
     planet_key_entry()
 def ee_auth_entry():
-    os.system("python ee_auth.py")
-    print("Paste authorization link already copied to your clipboard & paste back key")
+    auth_url = ee.oauth.get_authorization_url()
+    clipboard.copy(auth_url)
+    print("Authentication link copied: Go to browser and click paste")
+    time.sleep(10)
+    print("Enter your GEE API Token")
+    password=str(getpass.getpass())
+    auth_code=str(password)
+    token = ee.oauth.request_token(auth_code)
+    ee.oauth.write_token(token)
+    print('\nSuccessfully saved authorization token.')
 def ee_user_from_parser(args):
     ee_auth_entry()
-    
 def create_from_parser(args):
     typ=str(args.typ)
     ee_path=str(args.path)
