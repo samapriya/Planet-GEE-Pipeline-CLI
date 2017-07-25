@@ -61,7 +61,7 @@ This release also contains a windows installer which bypasses the need for you t
 ```
 ppipe -h
 ```
-Installation is an optional step; the application can be also run directly by executing ppipe.py script. The advantage of having it installed is being able to execute ppipe as any command line tool. I recommend installation within virtual environment. To install run
+Installation is an optional step; the application can be also run directly by executing ppipe.py script inside the ppipe folder(simply type ```python ppipe.py -h``` to get help. The advantage of having it installed is being able to execute ppipe as any command line tool. I recommend installation within virtual environment. To install run
 ```
 python setup.py develop or python setup.py install
 
