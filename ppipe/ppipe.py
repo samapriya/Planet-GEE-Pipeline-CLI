@@ -24,11 +24,17 @@ from acl_changer import access
 from cli_aoi2json import aoijson
 from cli_metadata import metadata
 from ee_ls import lst
-
+from os.path import expanduser
+from collsizes import collsize
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
 def planet_key_entry():
+    planethome=expanduser("~/.config/planet/")
+    if not os.path.exists(planethome):
+        os.mkdir(planethome)
     print("Enter your Planet API Key")
     password=getpass.getpass()
-    with open('./pkey.csv','w') as completed:
+    os.chdir(planethome)
+    with open("pkey.csv",'w') as completed:
         writer=csv.writer(completed,delimiter=',',lineterminator='\n')
         writer.writerow([password])
 def planet_key_from_parser(args):
@@ -55,7 +61,6 @@ def aoijson_from_parser(args):
     aoijson(start=args.start,end=args.end,cloud=args.cloud,inputfile=args.inputfile,geo=args.geo,loc=args.loc)
 def metadata_from_parser(args):
     metadata(asset=args.asset,mf=args.mf,mfile=args.mfile,errorlog=args.errorlog)
-
 def activatepl_from_parser(args):
     aoi_json=str(args.aoi)
     action_planet=str(args.action)
@@ -64,12 +69,22 @@ def activatepl_from_parser(args):
         os.system("python ./download.py --query "+args.aoi+" --"+args.action+" "+asset_type)
     except Exception:
         print(' ')
+def space_from_parser(args):
+    aoi=args.aoi
+    local=str(args.local)
+    asset=str(args.asset)
+    inlet='"'+local+'"'+" "+asset
+    try:
+        os.system('python download.py --query '+aoi+' --size '+inlet)
+    except Exception:
+        print(' ')
+
 def downloadpl_from_parser(args):
     aoi_json=str(args.aoi)
     planet_pathway=str(args.pathway)
     asset_type=str(args.asst)
     try:
-        os.system("python ./download.py --query "+args.aoi+" --download"+" "+args.pathway+" "+asset_type)
+        os.system("python download.py --query "+args.aoi+" --download"+" "+args.pathway+" "+asset_type)
     except Exception:
         print(' ')
         
@@ -92,13 +107,13 @@ def upload_from_parser(args):
            destination_path=args.dest,
            metadata_path=args.metadata,
            multipart_upload=args.large,
-           nodata_value=args.nodata)
-def ft_from_parser(args):
-    input_file=str(args.i)
-    output_ft=str(args.o)
-    os.system("ogr2ft.py -i "+input_file+" -o "+output_ft)
+           nodata_value=args.nodata,
+           bucket_name=args.bucket,
+           manifest=args.manifest)
 def taskquery_from_parser(args):
     taskquery(destination=args.destination)
+def collsize_from_parser(args):
+    collsize(coll=args.coll)
 def mover_from_parser(args):
 	mover(assetpath=args.assetpath,destinationpath=args.finalpath)
 def copy_from_parser(args):
@@ -108,13 +123,17 @@ def access_from_parser(args):
 def cleanout_from_parser(args):
     cleanout(args.dirpath)
 def tasks():
-    tasklist=subprocess.check_output("earthengine task list",shell=True)
+    tasklist=subprocess.check_output("earthengine task list")
+    taskcompleted=tasklist.count("COMPLETED")
     taskready=tasklist.count("READY")
     taskrunning=tasklist.count("RUNNING")
     taskfailed=tasklist.count("FAILED")
+    taskcancelled=tasklist.count("CANCELLED")
+    print("Completed Tasks:",taskcompleted)
     print("Running Tasks:",taskrunning)
     print("Ready Tasks:",taskready)
     print("Failed Tasks:",taskfailed)
+    print("Cancelled Tasks:",taskcancelled)
 def tasks_from_parser(args):
     tasks()
 def genreport_from_parser(args):
@@ -151,6 +170,12 @@ def main(args=None):
     parser_activatepl.add_argument('--asst',help='Choose between planet asset types (PSOrthoTile analytic/PSOrthoTile analytic_dn/PSOrthoTile visual/PSScene4Band analytic/PSScene4Band analytic_dn/PSScene3Band analytic/PSScene3Band analytic_dn/PSScene3Band visual/REOrthoTile analytic/REOrthoTile visual')
     parser_activatepl.set_defaults(func=activatepl_from_parser)
 
+    parser_space=subparsers.add_parser('space',help='Tool to query total download size of activated assets & local space left for download')
+    parser_space.add_argument('--aoi', help='Choose aoi.json file created earlier')
+    parser_space.add_argument('--local', help='local path where you are downloading assets')
+    parser_space.add_argument('--asset',help='Choose between planet asset types (PSOrthoTile analytic/PSOrthoTile analytic_dn/PSOrthoTile visual/PSScene4Band analytic/PSScene4Band analytic_dn/PSScene3Band analytic/PSScene3Band analytic_dn/PSScene3Band visual/REOrthoTile analytic/REOrthoTile visual')
+    parser_space.set_defaults(func=space_from_parser)
+
     parser_downloadpl=subparsers.add_parser('downloadpl',help='Tool to download Planet Assets')
     parser_downloadpl.add_argument('--aoi', help='Choose aoi.json file created earlier')
     parser_downloadpl.add_argument('--asst',help='Choose between planet asset types or for Metadata follow by _xml Eg: PSOrthoTile analytic_xml--->Assets Include:(PSOrthoTile analytic/PSOrthoTile analytic_dn/PSOrthoTile visual/PSScene4Band analytic/PSScene4Band analytic_dn/PSScene3Band analytic/PSScene3Band analytic_dn/PSScene3Band visual/REOrthoTile analytic/REOrthoTile visual')
@@ -158,7 +183,7 @@ def main(args=None):
     parser_downloadpl.set_defaults(func=downloadpl_from_parser)
 
     parser_metadata=subparsers.add_parser('metadata',help='Tool to tabulate and convert all metadata files from Planet or Digital Globe Assets')
-    parser_metadata.add_argument('--asset', help='Choose PS OrthoTile(PSO)|PS OrthoTile DN(PSO_DN)|PS OrthoTile Visual(PSO_V)|PS4Band Analytic(PS4B)|PS4Band DN(PS4B_DN)|PS3Band Analytic(PS3B)|PS3Band DN(PS3B_DN)|PS3Band Visual(PS3B_V)|RE OrthoTile (REO)|RE OrthoTile Visual(REO_V)|DigitalGlobe MultiSpectral(DGMS)|DigitalGlobe Panchromatic(DGP)?')
+    parser_metadata.add_argument('--asset', help='Choose PS OrthoTile(PSO)|PS OrthoTile DN(PSO_DN)|PS OrthoTile Visual(PSO_V)|PS4Band Analytic(PS4B)|PS4Band DN(PS4B_DN)|PS3Band Analytic(PS3B)|PS3Band DN(PS3B_DN)|PS3Band Visual(PS3B_V)|RE OrthoTile (REO)|RE OrthoTile Visual(REO_V)|DigitalGlobe MultiSpectral(DGMS)|DigitalGlobe Panchromatic(DGP)|PolarGeospatial CenterDEM Strip(PGCDEM)?')
     parser_metadata.add_argument('--mf', help='Metadata folder?')
     parser_metadata.add_argument('--mfile',help='Metadata filename to be exported along with Path.csv')
     parser_metadata.add_argument('--errorlog',default='./errorlog.csv',help='Errorlog to be exported along with Path.csv')
@@ -176,16 +201,21 @@ def main(args=None):
     parser_create.add_argument('--path', help='This is the path for the earth engine asset to be created full path is needsed eg: users/johndoe/collection', required=True)
     parser_create.set_defaults(func=create_from_parser)
     
-    parser_upload = subparsers.add_parser('upload', help='Batch Asset Uploader to Earth Engine.')
+    parser_upload = subparsers.add_parser('upload', help='Batch Asset Uploader.')
     required_named = parser_upload.add_argument_group('Required named arguments.')
-    required_named.add_argument('-u', '--user', help='Google account name (gmail address).', required=True)
     required_named.add_argument('--source', help='Path to the directory with images for upload.', required=True)
     required_named.add_argument('--dest', help='Destination. Full path for upload to Google Earth Engine, e.g. users/pinkiepie/myponycollection', required=True)
     optional_named = parser_upload.add_argument_group('Optional named arguments')
     optional_named.add_argument('-m', '--metadata', help='Path to CSV with metadata.')
+    optional_named.add_argument('-mf','--manifest',help='Manifest type to be used,for planetscope use "planetscope"')
     optional_named.add_argument('--large', action='store_true', help='(Advanced) Use multipart upload. Might help if upload of large '
                                                                      'files is failing on some systems. Might cause other issues.')
     optional_named.add_argument('--nodata', type=int, help='The value to burn into the raster as NoData (missing data)')
+
+    required_named.add_argument('-u', '--user', help='Google account name (gmail address).')
+    optional_named.add_argument('-s', '--service-account', help='Google Earth Engine service account.')
+    optional_named.add_argument('-k', '--private-key', help='Google Earth Engine private key file.')
+    optional_named.add_argument('-b', '--bucket', help='Google Cloud Storage bucket name.')
     parser_upload.set_defaults(func=upload_from_parser)
 
     parser_lst = subparsers.add_parser('lst',help='List assets in a folder/collection or write as text file')
@@ -194,6 +224,10 @@ def main(args=None):
     parser_lst.add_argument('--items', help="Number of items to list")
     parser_lst.add_argument('--folder',help="Folder location for report to be exported")
     parser_lst.set_defaults(func=lst_from_parser)
+
+    parser_collsize = subparsers.add_parser('collsize',help='Collects collection size in Human Readable form & Number of assets')
+    parser_collsize.add_argument('--coll', help='Earth Engine Collection for which to get size properties', required=True)
+    parser_collsize.set_defaults(func=collsize_from_parser)
     
     parser_delete = subparsers.add_parser('delete', help='Deletes collection and all items inside. Supports Unix-like wildcards.')
     parser_delete.add_argument('id', help='Full path to asset for deletion. Recursively removes all folders, collections and images.')
@@ -233,12 +267,6 @@ def main(args=None):
     parser_collprop.add_argument('--coll',help='Path of Image Collection')
     parser_collprop.add_argument('--p',help='"system:description=Description"/"system:provider_url=url"/"system:tags=tags"/"system:title=title')
     parser_collprop.set_defaults(func=collprop_from_parser)
-    
-    parser_ft = subparsers.add_parser('convert2ft',help='Uploads a given feature collection to Google Fusion Table.')
-    parser_ft.add_argument('--i', help='input feature source (KML, SHP, SpatiLite, etc.)', required=True)
-    parser_ft.add_argument('--o', help='output Fusion Table name', required=True)
-    parser_ft.add_argument('--add_missing', help='add missing features from the last inserted feature index', action='store_true', required=False, default=False)
-    parser_ft.set_defaults(func=ft_from_parser)
 
     parser_cleanout=subparsers.add_parser('cleanout',help='Clear folders with datasets from earlier downloaded')
     parser_cleanout.add_argument('--dirpath',help='Folder you want to delete after all processes have been completed')

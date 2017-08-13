@@ -7,14 +7,22 @@ import json
 import sys
 import logging
 import datetime
+import urllib3
+import psutil
 import csv
 from retrying import retry
+from os.path import expanduser
+#from urllib3 import PoolManager
+from requests.packages.urllib3.poolmanager import PoolManager
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+urllib3.disable_warnings()
 
 ASSET_URL = 'https://api.planet.com/data/v1/item-types/{}/items/{}/assets/'
 SEARCH_URL = 'https://api.planet.com/data/v1/quick-search'
-
-f=open("./pkey.csv")
+pkey=expanduser("~/.config/planet/pkey.csv")
+f=open(pkey)
 for row in csv.reader(f):
     #print(str(row).strip("[']"))
     os.environ['PLANET_API_KEY']=str(row).strip("[']")
@@ -248,6 +256,13 @@ def download(url, path, item_id, asset_type, overwrite):
 
     return True
 
+def size(url, path, item_id, asset_type, overwrite):
+    fname = '{}_{}.tif'.format(item_id, asset_type)
+    logging.info('Request: {}'.format(url))
+    result = requests.get(url)
+    print path
+    return True
+
 
 def process_activation(func, id_list, item_type, asset_type, activate_or_check):
     results = []
@@ -266,13 +281,13 @@ def process_activation(func, id_list, item_type, asset_type, activate_or_check):
 
     return results
 
-
 def process_download(path, id_list, item_type, asset_type, overwrite):
     results = []
 
     # check on directory structure
     if not os.path.exists(path):
-        raise IOError('Directory {} does not exist - please ensure that it does.'.format(path))
+        os.system("mkdir "+path)
+        print('Directory {} does not exist - being created.'.format(path))
 
     # now start downloading each file
     for item_id in id_list:
@@ -300,6 +315,47 @@ def process_download(path, id_list, item_type, asset_type, overwrite):
 
     return results
 
+def process_size(path, id_list, item_type, asset_type, overwrite):
+    results = []
+    summation=0
+    path= args.size
+    spc=psutil.disk_usage(path).free
+    remain=float(spc)/1073741824
+    # now start downloading each file
+    for item_id in id_list:
+        url = ASSET_URL.format(item_type, item_id)
+        logging.info('Request: {}'.format(url))
+        result = SESSION.get(url)
+        check_status(result)
+        try:
+            if result.json()[asset_type]['status'] == 'active':
+                download_url = result.json()[asset_type]['location']
+                #print(download_url)
+                pool = PoolManager()
+                response = pool.request("GET", download_url, preload_content=False)
+                max_bytes = 100000000000
+                content_bytes = response.headers.get("Content-Length")
+                print("Item-ID: "+str(item_id))
+                #print(int(content_bytes)/1048576,"MB")
+                summary=float(content_bytes)/1073741824
+                summation=summation+summary
+                #print ("Total Size in MB",summation)
+            else:
+                result = False
+        except KeyError:
+            print('Could not check activation status - asset type \'{}\' not found for {}'.format(asset_type, item_id))
+            result = False
+        
+
+        results.append(result)
+    #print(remain,"MB")
+    print("Remaining Space in MB",format(float(remain*1024),'.2f'))
+    print("Remaining Space in GB",format(float(remain),'.2f'))
+    print ("Total Size in MB",format(float(summation*1024),'.2f'))
+    print ("Total Size in GB",format(float(summation),'.2f'))
+    return results
+
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -310,6 +366,7 @@ if __name__ == '__main__':
                         metavar=('XMIN', 'YMIN', 'XMAX', 'YMAX'), nargs=4)
     parser.add_argument('--activate', help='Activate assets', action='store_true')
     parser.add_argument('--check', help='Check activation status', action='store_true')
+    parser.add_argument('--size',help='Check total size of download in MB')
     parser.add_argument('--download', help='Path where downloaded files should be stored')
     parser.add_argument('--overwrite', help='Overwrite existing downloads', action='store_true')
     parser.add_argument('--start-date', help='Start date for query (e.g. 2016-01-01)')
@@ -398,12 +455,17 @@ if __name__ == '__main__':
     elif args.download:
         results = process_download(args.download, id_list, args.item,
                                    args.asset, args.overwrite)
+    # check size
+    elif args.size:
+        results = process_size(args.download, id_list, args.item,
+                                   args.asset, args.overwrite)
 
     else:
         parser.error('Error: no action supplied. Please check help (--help) or revise command.')
 
 
 '''Sample commands, for testing.
+python download.py --query aoi.json --size "D:\Library\PlanetScope" PSOrthoTile analytic
 python download.py --query redding.json --search PSScene3Band visual
 python download.py --query redding.json --check PSScene3Band visual
 python download.py --query redding.json --activate PSScene3Band visual

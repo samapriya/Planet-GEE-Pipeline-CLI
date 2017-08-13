@@ -6,7 +6,7 @@ def readme():
 
 setup(
     name='ppipe',
-    version='0.1.5',
+    version='0.1.7',
     packages=find_packages(),
     package_data={'ppipe': ['logconfig.json','wrs_grid.csv']},
     url='https://github.com/samapriya/Planet-GEE-Pipeline',

@@ -12,5 +12,8 @@ pycrypto >= 2.6
 google-api-python-client >= 1.5.4
 pyshp >= 1.2.10
 gdal >= 1.11.4
+cImage >= 1.4.1
+urllib3 >= 1.20
+psutil >= 5.2.2
+google-cloud-storage >= 1.1.1
 clipboard >= 0.0.4
-cImage

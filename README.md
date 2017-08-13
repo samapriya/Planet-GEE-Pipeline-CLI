@@ -18,6 +18,7 @@ While moving between assets from Planet Inc and Google Earth Engine it was imper
 	* [Planet Key](#planet-key)
     * [AOI JSON](#aoi-json)
     * [Activate or Check Asset](#activate-or-check-asset)
+	* [Check Total size of assets](#check-total-size-of-assets)
     * [Download Asset](#download-asset)
     * [Metadata Parser](#metadata-parser)
 * [Earth Engine Tools](#earth-engine-tools)
@@ -25,17 +26,18 @@ While moving between assets from Planet Inc and Google Earth Engine it was imper
 	* [Create](#create)
     * [Upload a directory with images and associate properties with each image:](#upload-a-directory-with-images-and-associate-properties-with-each-image)
 	* [Upload a directory with images with specific NoData value to a selected destination:](#upload-a-directory-with-images-with-specific-nodata-value-to-a-selected-destination)
+	* [List all assets](#list-all-assets)
+	* [Collection size](#collection-size)
+	* [Delete a collection with content:](#delete-a-collection-with-content)
 	* [Task Query](#task-query)
 	* [Task Query during ingestion](#task-query-during-ingestion)
 	* [Task Report](#task-report)
-    * [Delete a collection with content:](#delete-a-collection-with-content)
+	* [Cancel all tasks](#cancel-all-tasks)
 	* [Assets Move](#assets-move)
 	* [Assets Copy](#assets-copy)
 	* [Assets Access](#assets-access)
 	* [Set Collection Property](#set-collection-property)
-	* [Convert to Fusion Table](#convert-to-fusion-table)
 	* [Cleanup Utility](#cleanup-utility)
-	* [Cancel all tasks](#cancel-all-tasks)
 
 ## Installation
 We assume Earth Engine Python API is installed and EE authorised as desribed [here](https://developers.google.com/earth-engine/python_install). We also assume Planet Python API is installed you can install by simply running.
@@ -61,7 +63,7 @@ This release also contains a windows installer which bypasses the need for you t
 ```
 ppipe -h
 ```
-Installation is an optional step; the application can be also run directly by executing ppipe.py script inside the ppipe folder(simply type ```python ppipe.py -h``` to get help). The advantage of having it installed is being able to execute ppipe as any command line tool. I recommend installation within virtual environment. To install run
+Installation is an optional step; the application can be also run directly by executing ppipe.py script. The advantage of having it installed is being able to execute ppipe as any command line tool. I recommend installation within virtual environment. To install run
 ```
 python setup.py develop or python setup.py install
 
@@ -75,13 +77,13 @@ As usual, to print help:
 ```
 usage: ppipe.py [-h]
                 {
-                ,planetkey,aoijson,activatepl,downloadpl,metadata,ee_user,create,upload,lst,delete,tasks,taskquery,report,cancel,mover,copy,access,collprop,convert2ft,cleanout}
+                ,planetkey,aoijson,activatepl,space,downloadpl,metadata,ee_user,create,upload,lst,collsize,delete,tasks,taskquery,report,cancel,mover,copy,access,collprop,cleanout}
                 ...
 
 Planet Pipeline with Google Earth Engine Batch Addons
 
 positional arguments:
-  { ,planetkey,aoijson,activatepl,downloadpl,metadata,ee_user,create,upload,lst,delete,tasks,taskquery,report,cancel,mover,copy,access,collprop,convert2ft,cleanout}
+  { ,planetkey,aoijson,activatepl,space,downloadpl,metadata,ee_user,create,upload,lst,collsize,delete,tasks,taskquery,report,cancel,mover,copy,access,collprop,cleanout}
                         ---------------------------------------
                         -----Choose from Planet Tools Below-----
                         ---------------------------------------
@@ -90,6 +92,8 @@ positional arguments:
                         WRS PathRow file to AreaOfInterest.JSON file with
                         structured query for use with Planet API 1.0
     activatepl          Tool to query and/or activate Planet Assets
+    space               Tool to query total download size of activated assets
+                        & local space left for download
     downloadpl          Tool to download Planet Assets
     metadata            Tool to tabulate and convert all metadata files from
                         Planet or Digital Globe Assets
@@ -100,9 +104,11 @@ positional arguments:
                         line/shell to change user
     create              Allows the user to create an asset collection or
                         folder in Google Earth Engine
-    upload              Batch Asset Uploader to Earth Engine.
+    upload              Batch Asset Uploader.
     lst                 List assets in a folder/collection or write as text
                         file
+    collsize            Collects collection size in Human Readable form &
+                        Number of assets
     delete              Deletes collection and all items inside. Supports
                         Unix-like wildcards.
     tasks               Queries currently running, enqued,failed
@@ -119,8 +125,6 @@ positional arguments:
                         "folder" --asset "users/john/doe" --user
                         "jimmy@doe.com:R"
     collprop            Sets Overall Properties for Image Collection
-    convert2ft          Uploads a given feature collection to Google Fusion
-                        Table.
     cleanout            Clear folders with datasets from earlier downloaded
 
 optional arguments:
@@ -143,26 +147,36 @@ for images, which is covered in the next section:
 
 
 ```
-usage: ppipe.py upload [-h] -u USER --source SOURCE --dest DEST [-m METADATA]
-                        [--large] [--nodata NODATA]
+usage: ppipe.py upload [-h] --source SOURCE --dest DEST [-m METADATA]
+                       [-mf MANIFEST] [--large] [--nodata NODATA] [-u USER]
+                       [-s SERVICE_ACCOUNT] [-k PRIVATE_KEY] [-b BUCKET]
 
 optional arguments:
   -h, --help            show this help message and exit
 
 Required named arguments.:
-  -u USER, --user USER  Google account name (gmail address).
   --source SOURCE       Path to the directory with images for upload.
   --dest DEST           Destination. Full path for upload to Google Earth
-                        Engine, e.g. users/johndoe/myponycollection
+                        Engine, e.g. users/pinkiepie/myponycollection
+  -u USER, --user USER  Google account name (gmail address).
 
 Optional named arguments:
   -m METADATA, --metadata METADATA
                         Path to CSV with metadata.
+  -mf MANIFEST, --manifest MANIFEST
+                        Manifest type to be used,for planetscope use
+                        "planetscope"
   --large               (Advanced) Use multipart upload. Might help if upload
                         of large files is failing on some systems. Might cause
                         other issues.
   --nodata NODATA       The value to burn into the raster as NoData (missing
                         data)
+  -s SERVICE_ACCOUNT, --service-account SERVICE_ACCOUNT
+                        Google Earth Engine service account.
+  -k PRIVATE_KEY, --private-key PRIVATE_KEY
+                        Google Earth Engine private key file.
+  -b BUCKET, --bucket BUCKET
+                        Google Cloud Storage bucket name.
 ```
 
 ### Parsing metadata
@@ -244,6 +258,23 @@ optional arguments:
 
 ```
 
+### Check Total size of assets
+It is important to sometimes estimate the overall size of download before you can actually download activated assets. This tool allows you to estimate local storage available at any location and overall size of download in MB or GB. This tool makes use of an existing url get request to look at content size and estimate overall download size of download for the activated assets.
+```
+usage: ppipe.py space [-h] [--aoi AOI] [--local LOCAL] [--asset ASSET]
+
+optional arguments:
+  -h, --help     show this help message and exit
+  --aoi AOI      Choose aoi.json file created earlier
+  --local LOCAL  local path where you are downloading assets
+  --asset ASSET  Choose between planet asset types (PSOrthoTile
+                 analytic/PSOrthoTile analytic_dn/PSOrthoTile
+                 visual/PSScene4Band analytic/PSScene4Band
+                 analytic_dn/PSScene3Band analytic/PSScene3Band
+                 analytic_dn/PSScene3Band visual/REOrthoTile
+                 analytic/REOrthoTile visual
+```
+
 ### Download Asset
 Having metadata helps in organising your asstets, but is not mandatory - you can skip it.
 The downloadpl tab allows the users to download assets. The platform can download Asset or Asset_XML which is the metadata file to desired folders.One again I was only interested in these two asset types(PSOrthoTile and REOrthoTile) for my work but can be easily extended to other asset types.
@@ -312,6 +343,31 @@ ppipe upload -u johndoe@gmail.com --source path_to_directory_with_tif --dest use
 ```
 In this case we need to supply full path to the destination, which is helpful when we upload to a shared folder. In the provided example we also burn value 222 into all rasters for missing data (NoData).
 
+### List all assets
+This tool allows you to list assets and is a direct derivative of the Earth Engine tool including the ability to export the list of assets as a text file.
+```
+usage: ppipe.py lst [-h] --location LOCATION --type TYPE [--items ITEMS]
+                    [--folder FOLDER]
+
+optional arguments:
+  -h, --help           show this help message and exit
+  --location LOCATION  This it the location of your folder/collection
+  --type TYPE          Whether you want the list to be printed or output as
+                       text
+  --items ITEMS        Number of items to list
+  --folder FOLDER      Folder location for report to be exported
+```
+
+### Collection size
+This tool allows you to iteratively calculate the size of an image collection or image in human readable format ,(MB/GB or TB). The system size is reflected and may not always match the space utilized on local drive. This is now part of the standard API but the standard API generates size in bytes.
+```
+usage: ppipe.py collsize [-h] --coll COLL
+
+optional arguments:
+  -h, --help   show this help message and exit
+  --coll COLL  Earth Engine Collection for which to get size properties
+```
+
 ### Task Query
 This script counts all currently running and ready tasks along with failed tasks.
 ```
@@ -336,7 +392,6 @@ optional arguments:
 ppipe.py taskquery "users/johndoe/myfolder/myponycollection"						
 ```
 
-	
 ### Task Report
 Sometimes it is important to generate a report based on all tasks that is running or has finished. Generated report includes taskId, data time, task status and type
 ```
@@ -368,6 +423,18 @@ Console output:
 
 ```
 ppipe delete users/johndoe/*weird[0-9]?name*
+```
+
+### Cancel all tasks
+This is a simpler tool, can be called directly from the earthengine cli as well
+```
+earthengine cli command
+earthengine task cancel all
+
+usage: ppipe.py cancel [-h]
+
+optional arguments:
+  -h, --help  show this help message and exit
 ```
 
 ### Assets Move
@@ -425,21 +492,6 @@ optional arguments:
                tem:tags=tags"/"system:title=title
 ```
 
-
-### Convert to Fusion Table
-Once validated with gdal and google fusion table it can be used to convert any geoObject to google fusion table. Forked and contributed by Gennadii [here](https://github.com/gena/ogr2ft). The scripts can be used only with a specific google account
-```
-usage: ppipe.py convert2ft [-h] --i I --o O [--add_missing]
-
-optional arguments:
-  -h, --help     show this help message and exit
-  --i I          input feature source (KML, SHP, SpatiLite, etc.)
-  --o O          output Fusion Table name
-  --add_missing  add missing features from the last inserted feature index
-
-ppipe.py convert2ft --i "./aoi.kml" --o "converted_aoi"
-```
-
 ### Cleanup Utility
 This script is used to clean folders once all processes have been completed. In short this is a function to clear folder on local machine.
 ```
@@ -452,14 +504,12 @@ optional arguments:
 ppipe.py cleanout --dirpath "./folder"
 ```
 
-### Cancel all tasks
-This is a simpler tool, can be called directly from the earthengine cli as well
-```
-earthengine cli command
-earthengine task cancel all
+# Changelog
 
-usage: ppipe.py cancel [-h]
-
-optional arguments:
-  -h, --help  show this help message and exit
-```
+## [0.1.7] - 2017-08-12 Compiled using Google Earth Engine API 1.1.9
+### Added & Removed
+- Planet Key is now stored in a configuration folder which is safer "C:\users\.config\planet"
+- Added capability to query download size and local disk capacity before downloading planet assets.
+- Added the list function to generate list of collections or folders including reports
+- Added the collection size tool which allows you to estimate total size or quota used from your allocated quota.
+- ogr2ft feature is removed since Earth Engine now allows vector and table uploading.
