@@ -38,6 +38,7 @@ While moving between assets from Planet Inc and Google Earth Engine it was imper
 	* [Assets Access](#assets-access)
 	* [Set Collection Property](#set-collection-property)
 	* [Cleanup Utility](#cleanup-utility)
+* [Credits](#credits)
 
 ## Installation
 We assume Earth Engine Python API is installed and EE authorised as desribed [here](https://developers.google.com/earth-engine/python_install). We also assume Planet Python API is installed you can install by simply running.
@@ -503,6 +504,12 @@ optional arguments:
                      completed
 ppipe.py cleanout --dirpath "./folder"
 ```
+
+### Credits
+[JetStream](https://jetstream-cloud.org/) A portion of the work is suported by JetStream Grant TG-GEO160014.
+
+Also supported by [Planet Labs Ambassador Program](https://www.planet.com/markets/ambassador-signup/)
+
 
 # Changelog
 
