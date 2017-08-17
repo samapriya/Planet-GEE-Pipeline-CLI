@@ -510,6 +510,8 @@ ppipe.py cleanout --dirpath "./folder"
 
 Also supported by [Planet Labs Ambassador Program](https://www.planet.com/markets/ambassador-signup/)
 
+Original upload function adapted from [Lukasz's asset manager tool](https://github.com/tracek/gee_asset_manager)
+
 
 # Changelog
 
