@@ -334,9 +334,9 @@ optional arguments:
 
 ### Upload a directory with images to your myfolder/mycollection and associate properties with each image:
 ```
-ppipe upload -u johndoe@gmail.com --source path_to_directory_with_tif -m path_to_metadata.csv --dest users/johndoe/myfolder/myponycollection
+ppipe upload -u johndoe@gmail.com --source path_to_directory_with_tif -m path_to_metadata.csv -mf maifest_type(ex:planetscope) --dest users/johndoe/myfolder/myponycollection
 ```
-The script will prompt the user for Google account password. The program will also check that all properties in path_to_metadata.csv do not contain any illegal characters for GEE. Don't need metadata? Simply skip this option.
+The script will prompt the user for Google account password. The program will also check that all properties in path_to_metadata.csv do not contain any illegal characters for GEE. Don't need metadata? Simply skip this option.You can also skip manifest for RapidEye imagery or any other source that does not require metadata field type handling.
 
 ### Upload a directory with images with specific NoData value to a selected destination 
 ```
@@ -518,6 +518,7 @@ Original upload function adapted from [Lukasz's asset manager tool](https://gith
 ## [0.1.7] - 2017-08-12 Compiled using Google Earth Engine API 1.1.9
 ### Added & Removed
 - Planet Key is now stored in a configuration folder which is safer "C:\users\.config\planet"
+- Earth Engine now requires you to assign a field type for metadata meaning an alphanumeric column like satID cannot also have numeric values unless specified explicitly . Manifest option has been added to handle this (just use -mf "planetscope")
 - Added capability to query download size and local disk capacity before downloading planet assets.
 - Added the list function to generate list of collections or folders including reports
 - Added the collection size tool which allows you to estimate total size or quota used from your allocated quota.
