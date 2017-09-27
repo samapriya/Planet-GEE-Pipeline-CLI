@@ -515,8 +515,9 @@ Original upload function adapted from [Lukasz's asset manager tool](https://gith
 
 # Changelog
 
-## [0.1.7] - 2017-08-12 Compiled using Google Earth Engine API 1.1.9
+## [0.1.8] - 2017-09-27 Compiled using Google Earth Engine API 1.1.9
 ### Added & Removed
+- Minor fixes to parser and general improvements
 - Planet Key is now stored in a configuration folder which is safer "C:\users\.config\planet"
 - Earth Engine now requires you to assign a field type for metadata meaning an alphanumeric column like satID cannot also have numeric values unless specified explicitly . Manifest option has been added to handle this (just use -mf "planetscope")
 - Added capability to query download size and local disk capacity before downloading planet assets.
