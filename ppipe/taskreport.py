@@ -1,5 +1,4 @@
 import ee
-import ee.mapclient
 import subprocess
 import csv
 from datetime import datetime
