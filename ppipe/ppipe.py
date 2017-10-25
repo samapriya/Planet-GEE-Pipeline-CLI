@@ -15,17 +15,16 @@ from batch_copy import copy
 from batch_remover import delete
 from batch_uploader import upload
 from config import setup_logging
-from query import taskquery
 from batch_mover import mover
-from cleanup import cleanout
 from collectionprop import collprop
 from taskreport import genreport
 from acl_changer import access
+from ee_ls import lst
+from assetsizes import assetsize
+from ee_report import ee_report
 from cli_aoi2json import aoijson
 from cli_metadata import metadata
-from ee_ls import lst
 from os.path import expanduser
-from collsizes import collsize
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 def planet_key_entry():
     planethome=expanduser("~/.config/planet/")
@@ -39,28 +38,10 @@ def planet_key_entry():
         writer.writerow([password])
 def planet_key_from_parser(args):
     planet_key_entry()
-def ee_auth_entry():
-    auth_url = ee.oauth.get_authorization_url()
-    clipboard.copy(auth_url)
-    print("Authentication link copied: Go to browser and click paste")
-    time.sleep(10)
-    print("Enter your GEE API Token")
-    password=str(getpass.getpass())
-    auth_code=str(password)
-    token = ee.oauth.request_token(auth_code)
-    ee.oauth.write_token(token)
-    print('\nSuccessfully saved authorization token.')
-def ee_user_from_parser(args):
-    ee_auth_entry()
-def create_from_parser(args):
-    typ=str(args.typ)
-    ee_path=str(args.path)
-    os.system("earthengine create "+typ+" "+ee_path)
-    
+
 def aoijson_from_parser(args):
     aoijson(start=args.start,end=args.end,cloud=args.cloud,inputfile=args.inputfile,geo=args.geo,loc=args.loc)
-def metadata_from_parser(args):
-    metadata(asset=args.asset,mf=args.mf,mfile=args.mfile,errorlog=args.errorlog)
+    
 def activatepl_from_parser(args):
     aoi_json=str(args.aoi)
     action_planet=str(args.action)
@@ -87,7 +68,38 @@ def downloadpl_from_parser(args):
         os.system("python download.py --query "+args.aoi+" --download"+" "+args.pathway+" "+asset_type)
     except Exception:
         print(' ')
-        
+def metadata_from_parser(args):
+    metadata(asset=args.asset,mf=args.mf,mfile=args.mfile,errorlog=args.errorlog)
+    
+##Earth Engine Tools
+def ee_auth_entry():
+    auth_url = ee.oauth.get_authorization_url()
+    clipboard.copy(auth_url)
+    print("Authentication link copied: Go to browser and click paste")
+    time.sleep(10)
+    print("Enter your GEE API Token")
+    password=str(getpass.getpass())
+    auth_code=str(password)
+    token = ee.oauth.request_token(auth_code)
+    ee.oauth.write_token(token)
+    print('\nSuccessfully saved authorization token.')
+def ee_user_from_parser(args):
+    ee_auth_entry()
+def create_from_parser(args):
+    typ=str(args.typ)
+    ee_path=str(args.path)
+    os.system("earthengine create "+typ+" "+ee_path)
+
+def ee_user_from_parser(args):
+    ee_authorization()
+def genreport_from_parser(args):
+    genreport(report=args.r)
+def collprop_from_parser(args):
+    collprop(imcoll=args.coll,prop=args.p)
+def assetsize_from_parser(args):
+    assetsize(asset=args.asset)
+def lst_from_parser(args):
+    lst(location=args.location,typ=args.typ,items=args.items,output=args.output)
 def cancel_all_running_tasks():
     logging.info('Attempting to cancel all running tasks')
     running_tasks = [task for task in ee.data.getTaskList() if task['state'] == 'RUNNING']
@@ -97,7 +109,7 @@ def cancel_all_running_tasks():
 
 def cancel_all_running_tasks_from_parser(args):
     cancel_all_running_tasks()
-	
+
 def delete_collection_from_parser(args):
     delete(args.id)
 
@@ -110,18 +122,15 @@ def upload_from_parser(args):
            nodata_value=args.nodata,
            bucket_name=args.bucket,
            manifest=args.manifest)
-def taskquery_from_parser(args):
-    taskquery(destination=args.destination)
-def collsize_from_parser(args):
-    collsize(coll=args.coll)
+def ee_report_from_parser(args):
+    ee_report(output=args.outfile)
+
 def mover_from_parser(args):
 	mover(assetpath=args.assetpath,destinationpath=args.finalpath)
 def copy_from_parser(args):
 	copy(initial=args.initial,final=args.final)
 def access_from_parser(args):
-	copy(mode=args.mode,asset=args.asset,user=args.user)
-def cleanout_from_parser(args):
-    cleanout(args.dirpath)
+	access(mode=args.mode,asset=args.asset,user=args.user)
 def tasks():
     tasklist=subprocess.check_output("earthengine task list")
     taskcompleted=tasklist.count("COMPLETED")
@@ -136,12 +145,6 @@ def tasks():
     print("Cancelled Tasks:",taskcancelled)
 def tasks_from_parser(args):
     tasks()
-def genreport_from_parser(args):
-    genreport(report=args.r)
-def collprop_from_parser(args):
-    collprop(imcoll=args.coll,prop=args.p)
-def lst_from_parser(args):
-    lst(location=args.location,typ=args.type,items=args.items,f=args.folder)
 spacing="                               "
 def main(args=None):
     setup_logging()
@@ -200,7 +203,7 @@ def main(args=None):
     parser_create.add_argument('--typ', help='Specify type: collection or folder', required=True)
     parser_create.add_argument('--path', help='This is the path for the earth engine asset to be created full path is needsed eg: users/johndoe/collection', required=True)
     parser_create.set_defaults(func=create_from_parser)
-    
+
     parser_upload = subparsers.add_parser('upload', help='Batch Asset Uploader.')
     required_named = parser_upload.add_argument_group('Required named arguments.')
     required_named.add_argument('--source', help='Path to the directory with images for upload.', required=True)
@@ -219,34 +222,34 @@ def main(args=None):
     parser_upload.set_defaults(func=upload_from_parser)
 
     parser_lst = subparsers.add_parser('lst',help='List assets in a folder/collection or write as text file')
-    parser_lst.add_argument('--location', help='This it the location of your folder/collection', required=True)
-    parser_lst.add_argument('--type', help='Whether you want the list to be printed or output as text', required=True)
-    parser_lst.add_argument('--items', help="Number of items to list")
-    parser_lst.add_argument('--folder',help="Folder location for report to be exported")
+    required_named = parser_lst.add_argument_group('Required named arguments.')
+    required_named.add_argument('--location', help='This it the location of your folder/collection', required=True)
+    required_named.add_argument('--typ', help='Whether you want the list to be printed or output as text[print/report]', required=True)
+    optional_named = parser_lst.add_argument_group('Optional named arguments')
+    optional_named.add_argument('--items', help="Number of items to list")
+    optional_named.add_argument('--output',help="Folder location for report to be exported")
     parser_lst.set_defaults(func=lst_from_parser)
 
-    parser_collsize = subparsers.add_parser('collsize',help='Collects collection size in Human Readable form & Number of assets')
-    parser_collsize.add_argument('--coll', help='Earth Engine Collection for which to get size properties', required=True)
-    parser_collsize.set_defaults(func=collsize_from_parser)
-    
+    parser_ee_report = subparsers.add_parser('ee_report',help='Prints a detailed report of all Earth Engine Assets includes Asset Type, Path,Number of Assets,size(MB),unit,owner,readers,writers')
+    parser_ee_report.add_argument('--outfile', help='This it the location of your report csv file ', required=True)
+    parser_ee_report.set_defaults(func=ee_report_from_parser)
+
+    parser_assetsize = subparsers.add_parser('assetsize',help='Prints collection size in Human Readable form & Number of assets')
+    parser_assetsize.add_argument('--asset', help='Earth Engine Asset for which to get size properties', required=True)
+    parser_assetsize.set_defaults(func=assetsize_from_parser)
+
+    parser_tasks=subparsers.add_parser('tasks',help='Queries current task status [completed,running,ready,failed,cancelled]')
+    parser_tasks.set_defaults(func=tasks_from_parser)
+
+    parser_genreport=subparsers.add_parser('taskreport',help='Create a report of all tasks and exports to a CSV file')
+    parser_genreport.add_argument('--r',help='Folder Path where the reports will be saved')
+    parser_genreport.set_defaults(func=genreport_from_parser)
+
+
     parser_delete = subparsers.add_parser('delete', help='Deletes collection and all items inside. Supports Unix-like wildcards.')
     parser_delete.add_argument('id', help='Full path to asset for deletion. Recursively removes all folders, collections and images.')
     parser_delete.set_defaults(func=delete_collection_from_parser)
 
-    parser_tasks=subparsers.add_parser('tasks',help='Queries currently running, enqued,failed')
-    parser_tasks.set_defaults(func=tasks_from_parser)
-    
-    parser_taskquery=subparsers.add_parser('taskquery',help='Queries currently running, enqued,failed ingestions and uploaded assets')
-    parser_taskquery.add_argument('--destination',help='Full path to asset where you are uploading files')
-    parser_taskquery.set_defaults(func=taskquery_from_parser)
-
-    parser_genreport=subparsers.add_parser('report',help='Create a report of all tasks and exports to a CSV file')
-    parser_genreport.add_argument('--r',help='Folder Path where the reports will be saved')
-    parser_genreport.set_defaults(func=genreport_from_parser)
-
-    parser_cancel = subparsers.add_parser('cancel', help='Cancel all running tasks')
-    parser_cancel.set_defaults(func=cancel_all_running_tasks_from_parser)
-    
     parser_mover=subparsers.add_parser('mover',help='Moves all assets from one collection to another')
     parser_mover.add_argument('--assetpath',help='Existing path of assets')
     parser_mover.add_argument('--finalpath',help='New path for assets')
@@ -257,20 +260,19 @@ def main(args=None):
     parser_copy.add_argument('--final',help='New path for assets')
     parser_copy.set_defaults(func=copy_from_parser)
 
-    parser_ft = subparsers.add_parser('access',help='Sets Permissions for Images, Collection or all assets in EE Folder Example: python ee_permissions.py --mode "folder" --asset "users/john/doe" --user "jimmy@doe.com:R"')
-    parser_ft.add_argument('--mode', help='This lets you select if you want to change permission or folder/collection/image', required=True)
-    parser_ft.add_argument('--asset', help='This is the path to the earth engine asset whose permission you are changing folder/collection/image', required=True)
-    parser_ft.add_argument('--user', help="""This is the email address to whom you want to give read or write permission Usage: "john@doe.com:R" or "john@doe.com:W" R/W refers to read or write permission""", required=True, default=False)
-    parser_ft.set_defaults(func=access_from_parser)
+    parser_access = subparsers.add_parser('access',help='Sets Permissions for Images, Collection or all assets in EE Folder Example: python ee_permissions.py --mode "folder" --asset "users/john/doe" --user "jimmy@doe.com:R"')
+    parser_access.add_argument('--mode', help='This lets you select if you want to change permission or folder/collection/image', required=True)
+    parser_access.add_argument('--asset', help='This is the path to the earth engine asset whose permission you are changing folder/collection/image', required=True)
+    parser_access.add_argument('--user', help="""This is the email address to whom you want to give read or write permission Usage: "john@doe.com:R" or "john@doe.com:W" R/W refers to read or write permission""", required=True, default=False)
+    parser_access.set_defaults(func=access_from_parser)
 
     parser_collprop=subparsers.add_parser('collprop',help='Sets Overall Properties for Image Collection')
     parser_collprop.add_argument('--coll',help='Path of Image Collection')
     parser_collprop.add_argument('--p',help='"system:description=Description"/"system:provider_url=url"/"system:tags=tags"/"system:title=title')
     parser_collprop.set_defaults(func=collprop_from_parser)
 
-    parser_cleanout=subparsers.add_parser('cleanout',help='Clear folders with datasets from earlier downloaded')
-    parser_cleanout.add_argument('--dirpath',help='Folder you want to delete after all processes have been completed')
-    parser_cleanout.set_defaults(func=cleanout_from_parser)
+    parser_cancel = subparsers.add_parser('cancel', help='Cancel all running tasks')
+    parser_cancel.set_defaults(func=cancel_all_running_tasks_from_parser)
 
     args = parser.parse_args()
 

@@ -6,9 +6,9 @@ def readme():
 
 setup(
     name='ppipe',
-    version='0.1.8',
+    version='0.1.9',
     packages=find_packages(),
-    package_data={'ppipe': ['logconfig.json','wrs_grid.csv']},
+    package_data={'ppipe': ['logconfig.json','aoi.json','wrs_grid.csv']},
     url='https://github.com/samapriya/Planet-GEE-Pipeline',
     license='Apache 2.0',
     classifiers=(
