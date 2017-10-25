@@ -343,6 +343,25 @@ ppipe upload -u johndoe@gmail.com --source path_to_directory_with_tif --dest use
 ```
 In this case we need to supply full path to the destination, which is helpful when we upload to a shared folder. In the provided example we also burn value 222 into all rasters for missing data (NoData).
 
+### Asset List
+This tool is designed to either print or output asset lists within folders or collections using earthengine ls tool functions.
+```
+usage: geeadd.py lst [-h] --location LOCATION --typ TYP [--items ITEMS]
+                     [--output OUTPUT]
+
+optional arguments:
+  -h, --help           show this help message and exit
+
+Required named arguments.:
+  --location LOCATION  This it the location of your folder/collection
+  --typ TYP            Whether you want the list to be printed or output as
+                       text[print/report]
+
+Optional named arguments:
+  --items ITEMS        Number of items to list
+  --output OUTPUT      Folder location for report to be exported
+```
+
 ### Asset Size
 This tool allows you to query the size of any Earth Engine asset[Images, Image Collections, Tables and Folders] and prints out the number of assets and total asset size in non-byte encoding meaning KB, MB, GB, TB depending on size.
 
