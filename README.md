@@ -6,7 +6,7 @@
 
 While moving between assets from Planet Inc and Google Earth Engine it was imperative to create a pipeline that allows for easy transitions between the two service end points and this tool is designed to act as a step by step process chain from Planet Assets to batch upload and modification within the Google Earth Engine environment. The ambition is apart from helping user with batch actions on assets along with interacting and extending capabilities of existing GEE CLI. It is developed case by case basis to include more features in the future as it becomes available or as need arises. tab.
 
-![CLI](http://i.imgur.com/mRUcPtq.gif)
+![CLI](https://i.imgur.com/1H4IlW9.gif)
 
 ## Table of contents
 * [Installation](#installation)
