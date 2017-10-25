@@ -26,18 +26,17 @@ While moving between assets from Planet Inc and Google Earth Engine it was imper
 	* [Create](#create)
     * [Upload a directory with images and associate properties with each image:](#upload-a-directory-with-images-and-associate-properties-with-each-image)
 	* [Upload a directory with images with specific NoData value to a selected destination:](#upload-a-directory-with-images-with-specific-nodata-value-to-a-selected-destination)
-	* [List all assets](#list-all-assets)
-	* [Collection size](#collection-size)
-	* [Delete a collection with content:](#delete-a-collection-with-content)
+	* [Asset List](#asset-list)
+	* [Asset Size](#asset-size)
+    * [Earth Engine Asset Report](#earth-engine-asset-report)
 	* [Task Query](#task-query)
-	* [Task Query during ingestion](#task-query-during-ingestion)
 	* [Task Report](#task-report)
-	* [Cancel all tasks](#cancel-all-tasks)
+    * [Delete a collection with content:](#delete-a-collection-with-content)
 	* [Assets Move](#assets-move)
 	* [Assets Copy](#assets-copy)
 	* [Assets Access](#assets-access)
 	* [Set Collection Property](#set-collection-property)
-	* [Cleanup Utility](#cleanup-utility)
+	* [Cancel all tasks](#cancel-all-tasks)
 * [Credits](#credits)
 
 ## Installation
@@ -344,72 +343,57 @@ ppipe upload -u johndoe@gmail.com --source path_to_directory_with_tif --dest use
 ```
 In this case we need to supply full path to the destination, which is helpful when we upload to a shared folder. In the provided example we also burn value 222 into all rasters for missing data (NoData).
 
-### List all assets
-This tool allows you to list assets and is a direct derivative of the Earth Engine tool including the ability to export the list of assets as a text file.
+### Asset Size
+This tool allows you to query the size of any Earth Engine asset[Images, Image Collections, Tables and Folders] and prints out the number of assets and total asset size in non-byte encoding meaning KB, MB, GB, TB depending on size.
+
 ```
-usage: ppipe.py lst [-h] --location LOCATION --type TYPE [--items ITEMS]
-                    [--folder FOLDER]
+usage: geeadd assetsize [-h] --asset ASSET
 
 optional arguments:
-  -h, --help           show this help message and exit
-  --location LOCATION  This it the location of your folder/collection
-  --type TYPE          Whether you want the list to be printed or output as
-                       text
-  --items ITEMS        Number of items to list
-  --folder FOLDER      Folder location for report to be exported
+  -h, --help     show this help message and exit
+  --asset ASSET  Earth Engine Asset for which to get size properties
 ```
 
-### Collection size
-This tool allows you to iteratively calculate the size of an image collection or image in human readable format ,(MB/GB or TB). The system size is reflected and may not always match the space utilized on local drive. This is now part of the standard API but the standard API generates size in bytes.
+### Earth Engine Asset Report
+This tool recursively goes through all your assets(Includes Images, ImageCollection,Table,) and generates a report containing the following fields
+[Type,Asset Type, Path,Number of Assets,size(MB),unit,owner,readers,writers].
+
 ```
-usage: ppipe.py collsize [-h] --coll COLL
+usage: geeadd.py ee_report [-h] --outfile OUTFILE
 
 optional arguments:
-  -h, --help   show this help message and exit
-  --coll COLL  Earth Engine Collection for which to get size properties
+  -h, --help         show this help message and exit
+  --outfile OUTFILE  This it the location of your report csv file
 ```
+A simple setup is the following
+``` geeadd --outfile "C:\johndoe\report.csv"```
 
 ### Task Query
 This script counts all currently running and ready tasks along with failed tasks.
 ```
-usage: ppipe.py tasks [-h]
+usage: geeadd.py tasks [-h]
 
 optional arguments:
   -h, --help  show this help message and exit
 
-ppipe.py tasks
-```
-
-### Task Query during ingestion
-This script can be used intermittently to look at running, failed and ready(waiting) tasks during ingestion. This script is a special case using query tasks only when uploading assets to collection by providing collection pathway to see how collection size increases.
-```
-usage: ppipe.py taskquery [-h] [--destination DESTINATION]
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --destination DESTINATION
-                        Full path to asset where you are uploading files
-
-ppipe.py taskquery "users/johndoe/myfolder/myponycollection"						
+geeadd.py tasks
 ```
 
 ### Task Report
 Sometimes it is important to generate a report based on all tasks that is running or has finished. Generated report includes taskId, data time, task status and type
 ```
-usage: ppipe.py report [-h] [--r R] [--e E]
+usage: geeadd taskreport [-h] [--r R]
 
 optional arguments:
   -h, --help  show this help message and exit
-  --r R       Path & CSV filename where the report will be saved
-  --e E       Path & CSV filename where the errorlog will be saved
-
-ppipe.py report --r "report.csv" --e "errorlog.csv"
+  --r R       Folder Path where the reports will be saved
 ```
+
 ### Delete a collection with content:
 
 The delete is recursive, meaning it will delete also all children assets: images, collections and folders. Use with caution!
 ```
-ppipe delete users/johndoe/test
+geeadd delete users/johndoe/test
 ```
 
 Console output:
@@ -423,25 +407,13 @@ Console output:
 ### Delete all directories / collections based on a Unix-like pattern
 
 ```
-ppipe delete users/johndoe/*weird[0-9]?name*
-```
-
-### Cancel all tasks
-This is a simpler tool, can be called directly from the earthengine cli as well
-```
-earthengine cli command
-earthengine task cancel all
-
-usage: ppipe.py cancel [-h]
-
-optional arguments:
-  -h, --help  show this help message and exit
+geeadd delete users/johndoe/*weird[0-9]?name*
 ```
 
 ### Assets Move
 This script allows us to recursively move assets from one collection to the other.
 ```
-usage: ppipe.py mover [-h] [--assetpath ASSETPATH] [--finalpath FINALPATH]
+usage: geeadd.py mover [-h] [--assetpath ASSETPATH] [--finalpath FINALPATH]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -449,25 +421,25 @@ optional arguments:
                         Existing path of assets
   --finalpath FINALPATH
                         New path for assets
-ppipe.py mover --assetpath "users/johndoe/myfolder/myponycollection" --destination "users/johndoe/myfolder/myotherponycollection"					
+geeadd.py mover --assetpath "users/johndoe/myfolder/myponycollection" --destination "users/johndoe/myfolder/myotherponycollection"
 ```
 
 ### Assets Copy
 This script allows us to recursively copy assets from one collection to the other. If you have read acess to assets from another user this will also allow you to copy assets from their collections.
 ```
-usage: ppipe.py copy [-h] [--initial INITIAL] [--final FINAL]
+usage: geeadd.py copy [-h] [--initial INITIAL] [--final FINAL]
 
 optional arguments:
   -h, --help         show this help message and exit
   --initial INITIAL  Existing path of assets
   --final FINAL      New path for assets
-ppipe.py mover --initial "users/johndoe/myfolder/myponycollection" --final "users/johndoe/myfolder/myotherponycollection"					
+geeadd.py mover --initial "users/johndoe/myfolder/myponycollection" --final "users/johndoe/myfolder/myotherponycollection"
 ```
 
 ### Assets Access
 This tool allows you to set asset acess for either folder , collection or image recursively meaning you can add collection access properties for multiple assets at the same time.
 ```
-usage: ppipe access [-h] --mode MODE --asset ASSET --user USER
+usage: geeadd access [-h] --mode MODE --asset ASSET --user USER
 
 optional arguments:
   -h, --help     show this help message and exit
@@ -478,13 +450,13 @@ optional arguments:
   --user USER    This is the email address to whom you want to give read or
                  write permission Usage: "john@doe.com:R" or "john@doe.com:W"
                  R/W refers to read or write permission
-ppipe.py access --mode folder --asset "folder/collection/image" --user "john@doe.com:R"
+geeadd.py access --mode folder --asset "folder/collection/image" --user "john@doe.com:R"
 ```
 
 ### Set Collection Property
-This script is derived from the ee tool to set collection properties and will set overall properties for collection. 
+This script is derived from the ee tool to set collection properties and will set overall properties for collection.
 ```
-usage: ppipe.py collprop [-h] [--coll COLL] [--p P]
+usage: geeadd.py collprop [-h] [--coll COLL] [--p P]
 
 optional arguments:
   -h, --help   show this help message and exit
@@ -493,16 +465,16 @@ optional arguments:
                tem:tags=tags"/"system:title=title
 ```
 
-### Cleanup Utility
-This script is used to clean folders once all processes have been completed. In short this is a function to clear folder on local machine.
+### Cancel all tasks
+This is a simpler tool, can be called directly from the earthengine cli as well
 ```
-usage: ppipe.py cleanout [-h] [--dirpath DIRPATH]
+earthengine cli command
+earthengine task cancel all
+
+usage: geeadd.py cancel [-h]
 
 optional arguments:
-  -h, --help         show this help message and exit
-  --dirpath DIRPATH  Folder you want to delete after all processes have been
-                     completed
-ppipe.py cleanout --dirpath "./folder"
+  -h, --help  show this help message and exit
 ```
 
 ### Credits
@@ -514,9 +486,11 @@ Original upload function adapted from [Lukasz's asset manager tool](https://gith
 
 
 # Changelog
+### v0.1.9
+- Changes made to reflect updated GEE Addon tools
+- general improvements
 
-## [0.1.8] - 2017-09-27 Compiled using Google Earth Engine API 1.1.9
-### Added & Removed
+### v0.1.8
 - Minor fixes to parser and general improvements
 - Planet Key is now stored in a configuration folder which is safer "C:\users\.config\planet"
 - Earth Engine now requires you to assign a field type for metadata meaning an alphanumeric column like satID cannot also have numeric values unless specified explicitly . Manifest option has been added to handle this (just use -mf "planetscope")
