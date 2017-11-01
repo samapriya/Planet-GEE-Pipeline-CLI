@@ -14,5 +14,5 @@ pyshp >= 1.2.10
 cImage >= 1.4.1
 urllib3 >= 1.20
 psutil >= 5.2.2
-google-cloud-storage >= 1.1.1
+google-cloud-storage == 1.5.0
 clipboard >= 0.0.4
