@@ -1,16 +1,7 @@
 #! /usr/bin/env python
 
-import argparse
-import logging
-import os
-import ee
-import subprocess
-import getpass
-import csv
+import argparse,logging,os,ee,subprocess,getpass,csv,re,time,clipboard
 from ee import oauth
-import re
-import time
-import clipboard
 from batch_copy import copy
 from batch_remover import delete
 from batch_uploader import upload
@@ -69,7 +60,7 @@ def downloadpl_from_parser(args):
     except Exception:
         print(' ')
 def metadata_from_parser(args):
-    metadata(asset=args.asset,mf=args.mf,mfile=args.mfile,errorlog=args.errorlog)
+    metadata(asset=args.asset,mf=args.mf,mfile=args.mfile,errorlog=args.errorlog,directory=args.dir)
     
 ##Earth Engine Tools
 def ee_auth_entry():
@@ -186,10 +177,12 @@ def main(args=None):
     parser_downloadpl.set_defaults(func=downloadpl_from_parser)
 
     parser_metadata=subparsers.add_parser('metadata',help='Tool to tabulate and convert all metadata files from Planet or Digital Globe Assets')
-    parser_metadata.add_argument('--asset', help='Choose PS OrthoTile(PSO)|PS OrthoTile DN(PSO_DN)|PS OrthoTile Visual(PSO_V)|PS4Band Analytic(PS4B)|PS4Band DN(PS4B_DN)|PS3Band Analytic(PS3B)|PS3Band DN(PS3B_DN)|PS3Band Visual(PS3B_V)|RE OrthoTile (REO)|RE OrthoTile Visual(REO_V)|DigitalGlobe MultiSpectral(DGMS)|DigitalGlobe Panchromatic(DGP)|PolarGeospatial CenterDEM Strip(PGCDEM)?')
+    parser_metadata.add_argument('--asset', help='Choose PS OrthoTile(PSO)|PS OrthoTile DN(PSO_DN)|PS OrthoTile Visual(PSO_V)|PS4Band Analytic(PS4B)|PS4Band DN(PS4B_DN)|PS4Band SR(PS4B_SR)|PS3Band Analytic(PS3B)|PS3Band DN(PS3B_DN)|PS3Band Visual(PS3B_V)|RE OrthoTile (REO)|RE OrthoTile Visual(REO_V)|DigitalGlobe MultiSpectral(DGMS)|DigitalGlobe Panchromatic(DGP)|PolarGeospatial CenterDEM Strip(PGCDEM)?')
     parser_metadata.add_argument('--mf', help='Metadata folder?')
     parser_metadata.add_argument('--mfile',help='Metadata filename to be exported along with Path.csv')
     parser_metadata.add_argument('--errorlog',default='./errorlog.csv',help='Errorlog to be exported along with Path.csv')
+    optional_named = parser_metadata.add_argument_group('Optional named arguments')
+    optional_named.add_argument('--dir', help='Path to Image Directory to be used to get ImageTags with metadata. use only with PS4B_SR')
     parser_metadata.set_defaults(func=metadata_from_parser)
 
     parser_EE1 = subparsers.add_parser(' ', help='-------------------------------------------')
@@ -210,7 +203,7 @@ def main(args=None):
     required_named.add_argument('--dest', help='Destination. Full path for upload to Google Earth Engine, e.g. users/pinkiepie/myponycollection', required=True)
     optional_named = parser_upload.add_argument_group('Optional named arguments')
     optional_named.add_argument('-m', '--metadata', help='Path to CSV with metadata.')
-    optional_named.add_argument('-mf','--manifest',help='Manifest type to be used,for planetscope use "planetscope"')
+    optional_named.add_argument('-mf','--manifest',help='Manifest type to be used,for PlanetScope Orthotile|"PSO" or PS4Band Surface Reflectance|"PS4B_SR"')
     optional_named.add_argument('--large', action='store_true', help='(Advanced) Use multipart upload. Might help if upload of large '
                                                                      'files is failing on some systems. Might cause other issues.')
     optional_named.add_argument('--nodata', type=int, help='The value to burn into the raster as NoData (missing data)')
