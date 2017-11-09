@@ -505,6 +505,10 @@ Original upload function adapted from [Lukasz's asset manager tool](https://gith
 
 
 # Changelog
+### v0.2.0
+- Metadata parser and Uploader Can now handle PlanetScope 4 Band Surface Reflectance Datasets
+- General Improvements
+
 ### v0.1.9
 - Changes made to reflect updated GEE Addon tools
 - general improvements
