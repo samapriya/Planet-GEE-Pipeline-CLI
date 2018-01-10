@@ -58,7 +58,9 @@ For Windows I found this [guide](https://sandbox.idre.ucla.edu/sandbox/tutorials
 To install **Planet-GEE-Pipeline-CLI:**
 ```
 git clone https://github.com/samapriya/Planet-GEE-Pipeline-CLI.git
-cd Planet-GEE-Pipeline-CLI && pip install .
+cd Planet-GEE-Pipeline-CLI && pip install -r requirements.txt
+
+for linux use sudo pip install -r requirements.txt
 ```
 This release also contains a windows installer which bypasses the need for you to have admin permission, it does however require you to have python in the system path meaning when you open up command prompt you should be able to type python and start it within the command prompt window. Post installation using the installer you can just call ppipe using the command prompt similar to calling python. Give it a go post installation type
 ```
