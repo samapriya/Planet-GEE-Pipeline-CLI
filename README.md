@@ -1,6 +1,6 @@
 # Planet GEE Pipeline CLI
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1044509.svg)](https://doi.org/10.5281/zenodo.1044509)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1194323.svg)](https://doi.org/10.5281/zenodo.1194323)
 [![JetStream](https://img.shields.io/badge/SupportedBy%3A-JetStream-brightgreen.svg)](https://jetstream-cloud.org/)
 [![Planet](https://img.shields.io/badge/SupportedBy%3A-Planet%20Ambassador%20Program-brightgreen.svg)](https://www.planet.com/products/education-and-research/)
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/samapriya)
