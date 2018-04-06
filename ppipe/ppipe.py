@@ -37,10 +37,11 @@ def activatepl_from_parser(args):
     aoi_json=str(args.aoi)
     action_planet=str(args.action)
     asset_type=str(args.asst)
-    try:
-        os.system("python ./download.py --query "+args.aoi+" --"+args.action+" "+asset_type)
-    except Exception:
-        print(' ')
+    subprocess.call("python download.py --query "+'"'+aoi_json+'" '+"--activate "+asset_type,shell=True)
+##    try:
+##        os.system("python ./download.py --query "+args.aoi+" --"+args.action+" "+asset_type)
+##    except Exception:
+##        print(' ')
 def space_from_parser(args):
     aoi=args.aoi
     local=str(args.local)
