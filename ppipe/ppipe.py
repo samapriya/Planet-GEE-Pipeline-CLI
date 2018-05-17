@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import argparse,logging,os,ee,subprocess,getpass,csv,re,time,clipboard
+from collections import Counter
 from ee import oauth
 from batch_copy import copy
 from batch_remover import delete
@@ -15,8 +16,11 @@ from assetsizes import assetsize
 from ee_report import ee_report
 from cli_aoi2json import aoijson
 from cli_metadata import metadata
+from hurry import filesize
+from idlst import idl
 from os.path import expanduser
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
+lpath=os.path.dirname(os.path.realpath(__file__))
 def planet_key_entry():
     planethome=expanduser("~/.config/planet/")
     if not os.path.exists(planethome):
@@ -32,16 +36,20 @@ def planet_key_from_parser(args):
 
 def aoijson_from_parser(args):
     aoijson(start=args.start,end=args.end,cloud=args.cloud,inputfile=args.inputfile,geo=args.geo,loc=args.loc)
-    
+
+def idl_from_parser(args):
+    idl(infile=args.aoi,item=args.item,asset=args.asset,num=int(args.number))
+
 def activatepl_from_parser(args):
-    aoi_json=str(args.aoi)
-    action_planet=str(args.action)
-    asset_type=str(args.asst)
-    subprocess.call("python download.py --query "+'"'+aoi_json+'" '+"--activate "+asset_type,shell=True)
-##    try:
-##        os.system("python ./download.py --query "+args.aoi+" --"+args.action+" "+asset_type)
-##    except Exception:
-##        print(' ')
+    if args.aoi==None:
+        asset_type=str(args.asst)
+        subprocess.call("python download.py --idlist "+'"'+"idpl.txt"+'" '+"--activate "+asset_type,shell=True)
+    else:
+        aoi_json=str(args.aoi)
+        action_planet=str(args.action)
+        asset_type=str(args.asst)
+        subprocess.call("python download.py --query "+'"'+aoi_json+'" '+"--activate "+asset_type,shell=True)
+
 def space_from_parser(args):
     aoi=args.aoi
     local=str(args.local)
@@ -53,16 +61,20 @@ def space_from_parser(args):
         print(' ')
 
 def downloadpl_from_parser(args):
-    aoi_json=str(args.aoi)
-    planet_pathway=str(args.pathway)
-    asset_type=str(args.asst)
-    try:
-        os.system("python download.py --query "+args.aoi+" --download"+" "+args.pathway+" "+asset_type)
-    except Exception:
-        print(' ')
+    if args.aoi==None:
+        subprocess.call("python download.py --idlist "+'"'+"idpl.txt"+'" '+"--download "+args.pathway+" "+args.asst,shell=True)
+    else:
+        aoi_json=str(args.aoi)
+        planet_pathway=str(args.pathway)
+        asset_type=str(args.asst)
+        try:
+            os.system("python download.py --query "+args.aoi+" --download"+" "+args.pathway+" "+asset_type)
+        except Exception:
+            print(' ')
+
 def metadata_from_parser(args):
     metadata(asset=args.asset,mf=args.mf,mfile=args.mfile,errorlog=args.errorlog,directory=args.dir)
-    
+
 ##Earth Engine Tools
 def ee_auth_entry():
     auth_url = ee.oauth.get_authorization_url()
@@ -77,6 +89,15 @@ def ee_auth_entry():
     print('\nSuccessfully saved authorization token.')
 def ee_user_from_parser(args):
     ee_auth_entry()
+def quota():
+    quota=ee.data.getAssetRootQuota(ee.data.getAssetRoots()[0]['id'])
+    print('')
+    print("Total Quota: "+filesize.size(quota['asset_size']['limit']))
+    print("Used Quota: "+filesize.size(quota['asset_size']['usage']))
+
+def quota_from_parser(args):
+    quota()
+
 def create_from_parser(args):
     typ=str(args.typ)
     ee_path=str(args.path)
@@ -124,17 +145,16 @@ def copy_from_parser(args):
 def access_from_parser(args):
 	access(mode=args.mode,asset=args.asset,user=args.user)
 def tasks():
-    tasklist=subprocess.check_output("earthengine task list")
-    taskcompleted=tasklist.count("COMPLETED")
-    taskready=tasklist.count("READY")
-    taskrunning=tasklist.count("RUNNING")
-    taskfailed=tasklist.count("FAILED")
-    taskcancelled=tasklist.count("CANCELLED")
-    print("Completed Tasks:",taskcompleted)
-    print("Running Tasks:",taskrunning)
-    print("Ready Tasks:",taskready)
-    print("Failed Tasks:",taskfailed)
-    print("Cancelled Tasks:",taskcancelled)
+    statuses=ee.data.getTaskList()
+    st=[]
+    for status in statuses:
+        st.append(status['state'])
+    print("Tasks Running: "+str(st.count('RUNNING')))
+    print("Tasks Ready: "+str(st.count('READY')))
+    print("Tasks Completed: "+str(st.count('COMPLETED')))
+    print("Tasks Failed: "+str(st.count('FAILED')))
+    print("Tasks Cancelled: "+str(st.count('CANCELLED')))
+
 def tasks_from_parser(args):
     tasks()
 spacing="                               "
@@ -146,10 +166,10 @@ def main(args=None):
     parser_pp1 = subparsers.add_parser(' ', help='---------------------------------------')
     parser_P = subparsers.add_parser(' ', help='-----Choose from Planet Tools Below-----')
     parser_pp2 = subparsers.add_parser(' ', help='---------------------------------------')
-    
+
     parser_planet_key = subparsers.add_parser('planetkey', help='Enter your planet API Key')
     parser_planet_key.set_defaults(func=planet_key_from_parser)
-    
+
     parser_aoijson=subparsers.add_parser('aoijson',help='Tool to convert KML, Shapefile,WKT,GeoJSON or Landsat WRS PathRow file to AreaOfInterest.JSON file with structured query for use with Planet API 1.0')
     parser_aoijson.add_argument('--start', help='Start date in YYYY-MM-DD?')
     parser_aoijson.add_argument('--end', help='End date in YYYY-MM-DD?')
@@ -159,10 +179,17 @@ def main(args=None):
     parser_aoijson.add_argument('--loc', help='Location where aoi.json file is to be stored')
     parser_aoijson.set_defaults(func=aoijson_from_parser)
 
-    parser_activatepl=subparsers.add_parser('activatepl',help='Tool to query and/or activate Planet Assets')
-    parser_activatepl.add_argument('--aoi', help='Choose aoi.json file created earlier')
-    parser_activatepl.add_argument('--action', help='choose between check/activate')
+    parser_idl=subparsers.add_parser('idlist',help='Creates an IDLIST that intersects AOI JSON')
+    parser_idl.add_argument('--aoi', help='Choose aoi.json file created earlier')
+    parser_idl.add_argument('--item', help='choose between Planet Item types PSOrthoTile|PSScene4Band|PSScene3Band|REOrthoTile')
+    parser_idl.add_argument('--asset',help='Choose between Planet asset types analytic|analytic_dn|visual')
+    parser_idl.add_argument('--number',help='Maximum number of assets for the idlist')
+    parser_idl.set_defaults(func=idl_from_parser)
+
+    parser_activatepl=subparsers.add_parser('activatepl',help='Tool to activate Planet Assets')
     parser_activatepl.add_argument('--asst',help='Choose between planet asset types (PSOrthoTile analytic/PSOrthoTile analytic_dn/PSOrthoTile visual/PSScene4Band analytic/PSScene4Band analytic_dn/PSScene3Band analytic/PSScene3Band analytic_dn/PSScene3Band visual/REOrthoTile analytic/REOrthoTile visual')
+    optional_named = parser_activatepl.add_argument_group('Optional named arguments')
+    optional_named.add_argument('--aoi', help='Choose aoi.json file created earlier')
     parser_activatepl.set_defaults(func=activatepl_from_parser)
 
     parser_space=subparsers.add_parser('space',help='Tool to query total download size of activated assets & local space left for download')
@@ -172,9 +199,10 @@ def main(args=None):
     parser_space.set_defaults(func=space_from_parser)
 
     parser_downloadpl=subparsers.add_parser('downloadpl',help='Tool to download Planet Assets')
-    parser_downloadpl.add_argument('--aoi', help='Choose aoi.json file created earlier')
     parser_downloadpl.add_argument('--asst',help='Choose between planet asset types or for Metadata follow by _xml Eg: PSOrthoTile analytic_xml--->Assets Include:(PSOrthoTile analytic/PSOrthoTile analytic_dn/PSOrthoTile visual/PSScene4Band analytic/PSScene4Band analytic_dn/PSScene3Band analytic/PSScene3Band analytic_dn/PSScene3Band visual/REOrthoTile analytic/REOrthoTile visual')
     parser_downloadpl.add_argument('--pathway',help='Folder Pathways where PlanetAssets are saved exampled ./PlanetScope ./RapidEye')
+    optional_named = parser_downloadpl.add_argument_group('Optional named arguments')
+    optional_named.add_argument('--aoi', help='Choose aoi.json file created earlier')
     parser_downloadpl.set_defaults(func=downloadpl_from_parser)
 
     parser_metadata=subparsers.add_parser('metadata',help='Tool to tabulate and convert all metadata files from Planet or Digital Globe Assets')
@@ -192,7 +220,10 @@ def main(args=None):
 
     parser_ee_user = subparsers.add_parser('ee_user', help='Get Earth Engine API Key & Paste it back to Command line/shell to change user')
     parser_ee_user.set_defaults(func=ee_user_from_parser)
-    
+
+    parser_quota = subparsers.add_parser('quota', help='Print Earth Engine total quota and used quota')
+    parser_quota.set_defaults(func=quota_from_parser)
+
     parser_create = subparsers.add_parser('create',help='Allows the user to create an asset collection or folder in Google Earth Engine')
     parser_create.add_argument('--typ', help='Specify type: collection or folder', required=True)
     parser_create.add_argument('--path', help='This is the path for the earth engine asset to be created full path is needsed eg: users/johndoe/collection', required=True)
@@ -202,9 +233,9 @@ def main(args=None):
     required_named = parser_upload.add_argument_group('Required named arguments.')
     required_named.add_argument('--source', help='Path to the directory with images for upload.', required=True)
     required_named.add_argument('--dest', help='Destination. Full path for upload to Google Earth Engine, e.g. users/pinkiepie/myponycollection', required=True)
+    required_named.add_argument('-m', '--metadata', help='Path to CSV with metadata.')
+    required_named.add_argument('-mf','--manifest',help='Manifest type to be used,Choose PS OrthoTile(PSO)|PS OrthoTile DN(PSO_DN)|PS OrthoTile Visual(PSO_V)|PS4Band Analytic(PS4B)|PS4Band DN(PS4B_DN)|PS4Band SR(PS4B_SR)|PS3Band Analytic(PS3B)|PS3Band DN(PS3B_DN)|PS3Band Visual(PS3B_V)|RE OrthoTile (REO)|RE OrthoTile Visual(REO_V)')
     optional_named = parser_upload.add_argument_group('Optional named arguments')
-    optional_named.add_argument('-m', '--metadata', help='Path to CSV with metadata.')
-    optional_named.add_argument('-mf','--manifest',help='Manifest type to be used,for PlanetScope Orthotile|"PSO" or PS4Band Surface Reflectance|"PS4B_SR"')
     optional_named.add_argument('--large', action='store_true', help='(Advanced) Use multipart upload. Might help if upload of large '
                                                                      'files is failing on some systems. Might cause other issues.')
     optional_named.add_argument('--nodata', type=int, help='The value to burn into the raster as NoData (missing data)')

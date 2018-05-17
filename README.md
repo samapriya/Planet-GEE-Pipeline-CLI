@@ -45,7 +45,7 @@ We assume Earth Engine Python API is installed and EE authorised as desribed [he
 ```
 pip install planet
 ```
-Further instructions can be found [here](https://www.planet.com/docs/api-quickstart-examples/cli/) 
+Further instructions can be found [here](https://www.planet.com/docs/api-quickstart-examples/cli/)
 
 **This toolbox also uses some functionality from GDAL**
 For installing GDAL in Ubuntu
@@ -190,7 +190,7 @@ By metadata we understand here the properties associated with each image. Thanks
 | file1                        | value1           | value2           |
 | file2                        | value3           | value4           |
 
-Note that header can contain only letters, digits and underscores. 
+Note that header can contain only letters, digits and underscores.
 
 Example:
 
@@ -226,7 +226,7 @@ optional arguments:
 ```
 
 If using on a private machine the Key is saved as a csv file for all future runs of the tool.
- 
+
 ### AOI JSON
 The aoijson tab within the toolset allows you to create filters and structure your existing input file to that which can be used with Planet's API. The tool requires inputs with start and end date, along with cloud cover. You can choose from multiple input files types such as KML, Zipped Shapefile, GeoJSON, WKT or even Landsat Tiles based on PathRow numbers. The geo option asks you to select existing files which will be converted into formatted JSON file called aoi.json. If using WRS as an option just type in the 6 digit PathRow combination and it will create a json file for you.
 ```
@@ -297,7 +297,7 @@ optional arguments:
 ```
 
 ### Metadata Parser
-The metadata tab is a more powerful tool and consists of metadata parsing for All PlanetScope and RapiEye Assets along with Digital Globe MultiSpectral and DigitalGlobe PanChromatic datasets. This was developed as a standalone to process xml metadata files from multiple sources and is important step is the user plans to upload these assets to Google Earth Engine. 
+The metadata tab is a more powerful tool and consists of metadata parsing for All PlanetScope and RapiEye Assets along with Digital Globe MultiSpectral and DigitalGlobe PanChromatic datasets. This was developed as a standalone to process xml metadata files from multiple sources and is important step is the user plans to upload these assets to Google Earth Engine.
 
 ```
 usage: ppipe.py metadata [-h] [--asset ASSET] [--mf MF] [--mfile MFILE]
@@ -332,7 +332,7 @@ optional arguments:
   --typ TYP    Specify type: collection or folder
   --path PATH  This is the path for the earth engine asset to be created full
                path is needsed eg: users/johndoe/collection
-```			   
+```
 
 ### Upload a directory with images to your myfolder/mycollection and associate properties with each image:
 ```
@@ -340,7 +340,7 @@ ppipe upload -u johndoe@gmail.com --source path_to_directory_with_tif -m path_to
 ```
 The script will prompt the user for Google account password. The program will also check that all properties in path_to_metadata.csv do not contain any illegal characters for GEE. Don't need metadata? Simply skip this option.You can also skip manifest for RapidEye imagery or any other source that does not require metadata field type handling.
 
-### Upload a directory with images with specific NoData value to a selected destination 
+### Upload a directory with images with specific NoData value to a selected destination
 ```
 ppipe upload -u johndoe@gmail.com --source path_to_directory_with_tif --dest users/johndoe/myfolder/myponycollection --nodata 222
 ```
@@ -508,6 +508,12 @@ Original upload function adapted from [Lukasz's asset manager tool](https://gith
 
 
 # Changelog
+
+### v0.2.2
+
+- Major improvements to ingestion using manifest ingest in Google Earth Engine
+- Contains manifest for all commonly used Planet Data item and asset combinations
+- Added additional tool to Earth Engine Enhancement including quota check before upload to GEE
 
 ### v0.2.1
 - Fixed initialization loop issue

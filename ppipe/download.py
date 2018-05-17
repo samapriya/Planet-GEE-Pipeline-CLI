@@ -233,7 +233,7 @@ def check_activation(item_id, item_type, asset_type):
     retry_on_exception=retry_if_rate_limit_error,
     stop_max_attempt_number=5)
 def download(url, path, item_id, asset_type, overwrite):
-    fname = '{}_{}.tif'.format(item_id, asset_type)
+    fname = item_id
     local_path = os.path.join(path, fname)
 
     if not overwrite and os.path.exists(local_path):
@@ -300,6 +300,8 @@ def process_download(path, id_list, item_type, asset_type, overwrite):
         try:
             if result.json()[asset_type]['status'] == 'active':
                 download_url = result.json()[asset_type]['location']
+                r=SESSION.get(download_url,allow_redirects=False)
+                item_id=r.headers['location'].split('/')[4].split('?')[0]
                 result = download(download_url, path, item_id, asset_type, overwrite)
             else:
                 result = False

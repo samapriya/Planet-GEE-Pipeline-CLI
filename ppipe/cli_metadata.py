@@ -5,30 +5,42 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
     if directory is None:
         if asset == 'PSO': # PS OrthoTile Analytic
             folder = mf
+            path, dirs, files = next(os.walk(folder))
+            file_count = len(files)
+            i=1
             with open(mfile,'wb') as csvfile:
-                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "platform", "satType","satID", "tileID", "numBands", "cloudcover","incAngle","illAzAngle","illElvAngle","azAngle","spcAngle","rsf","refCoeffB1","refCoeffB2","refCoeffB3","refCoeffB4"], delimiter=',')
+                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "product_type",
+                                                          "orbit","provider","instrument","satellite_id","tile_id",
+                                                          "number_of_bands", "epsg_code","resampling_kernel",
+                                                          "number_of_rows","number_of_columns","gsd","cloud_cover","incidence_angle",
+                                                          "sun_azimuth","sun_elevation","azimuth_angle","spacecraft_angle",
+                                                          "radiometric_scale_factor","reflectance_coefficient_b1",
+                                                          "reflectance_coefficient_b2","reflectance_coefficient_b3",
+                                                          "reflectance_coefficient_b4"], delimiter=',')
                 writer.writeheader()
             with open(errorlog,'wb') as csvfile:
                 writer=csv.DictWriter(csvfile,fieldnames=["id_no"], delimiter=',')
                 writer.writeheader()
             for filename in os.listdir(folder):
-                infilename = os.path.join(folder,filename)
-                fsp=filename.split("_x")[0]
+                infilename = os.path.join(folder, filename)
+                fsp = filename.split('_x')[0]
                 try:
-                    #This gets the main xml parse tree
-                    xmldoc=minidom.parse(infilename)
-                    ps=xmldoc.getElementsByTagName("ps:EarthObservationMetaData")[0]
-                    observation=xmldoc.getElementsByTagName("ps:EarthObservationResult") [0]
-                    eopfilename=xmldoc.getElementsByTagName("eop:fileName")[0].firstChild.data
-                    meta=xmldoc.getElementsByTagName("ps:EarthObservationMetaData")[0]
-                    acquisition= meta.getElementsByTagName("eop:acquisitionDate")[0].firstChild.data
-                    tile=meta.getElementsByTagName("ps:tileId")[0].firstChild.data
-                    equip=xmldoc.getElementsByTagName("eop:Platform")[0]
-                    platform=equip.getElementsByTagName("eop:shortName")[0].firstChild.data
-                    sid=equip.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
-                    equip=xmldoc.getElementsByTagName("eop:instrument")[0]
-                    sattype=equip.getElementsByTagName("eop:shortName")[0].firstChild.data
+                    xmldoc = minidom.parse(infilename)
+                    ps4band=xmldoc.getElementsByTagName('ps:EarthObservationMetaData')[0]
+                    eopfilename = xmldoc.getElementsByTagName('eop:identifier')[0].firstChild.data
+                    productType = xmldoc.getElementsByTagName('eop:productType')[0].firstChild.data
+                    orbit = xmldoc.getElementsByTagName('eop:orbitType')[0].firstChild.data
+                    acquisition = xmldoc.getElementsByTagName('eop:acquisitionDate')[0].firstChild.data
+                    provider=xmldoc.getElementsByTagName("eop:shortName")[0].firstChild.data
+                    instrument=xmldoc.getElementsByTagName("eop:shortName")[1].firstChild.data
+                    satellite_id=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
+                    tile_id=xmldoc.getElementsByTagName("ps:tileId")[0].firstChild.data
                     bands=xmldoc.getElementsByTagName("ps:numBands")[0].firstChild.data
+                    epsg_code=xmldoc.getElementsByTagName("ps:epsgCode")[0].firstChild.data
+                    resampling_kernel=xmldoc.getElementsByTagName("ps:resamplingKernel")[0].firstChild.data
+                    number_rows=xmldoc.getElementsByTagName("ps:numRows")[0].firstChild.data
+                    number_columns=xmldoc.getElementsByTagName("ps:numColumns")[0].firstChild.data
+                    gsd=xmldoc.getElementsByTagName("ps:rowGsd")[0].firstChild.data
                     cloud=xmldoc.getElementsByTagName("opt:cloudCoverPercentage")[0].firstChild.data
                     psb=xmldoc.getElementsByTagName("ps:bandNumber")[0].firstChild.data
                     psb1=xmldoc.getElementsByTagName("ps:bandNumber")[1].firstChild.data
@@ -44,33 +56,18 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     psilelv=xmldoc.getElementsByTagName("opt:illuminationElevationAngle")[0].firstChild.data
                     psaz=xmldoc.getElementsByTagName("ps:azimuthAngle")[0].firstChild.data
                     pssca=xmldoc.getElementsByTagName("ps:spaceCraftViewAngle")[0].firstChild.data
-                    print("ID_Name:", eopfilename.split(".")[0])
-                    print("Acquisition Date:", acquisition.split("T")[0])
-                    print("Satellite Type:", platform)
-                    print("ShortName:", sattype)
-                    print("Satellite ID:", str(sid))
-                    print("Tile ID:", tile)
-                    print("Number of Bands:", bands)
-                    print("Cloud Cover:", format(float(cloud),'.2f'))
-                    print("PS Incidence Angle",format(float(psia),'.4f'))
-                    print("PS illumination azimuth angle",format(float(psilaz),'.2f'))
-                    print("PS illumination elevation angle",format(float(psilelv),'.2f'))
-                    print("PS Azimuth angle",format(float(psaz),'.2f'))
-                    print("PS SpaceCraft angle",format(float(pssca),'.4f'))
-                    print("Radiometric Scale Factor",psbrad)
-                    print("ReflectanceCoefficient B1",format(float(psb1ref),'.8f'))
-                    print("ReflectanceCoefficient B2",format(float(psb2ref),'.8f'))
-                    print("ReflectanceCoefficient B3",format(float(psb3ref),'.8f'))
-                    print("ReflectanceCoefficient B4",format(float(psb4ref),'.8f'))
-                    date_time = acquisition.split("T")[0]
+                    date_time = acquisition.split('T')[0]
                     pattern = '%Y-%m-%d'
-                    epoch = int(time.mktime(time.strptime(date_time, pattern)))*1000
-                    print("epoch time", epoch)
+                    epoch = int(time.mktime(time.strptime(date_time, pattern))) * 1000
+                    print("Processing "+str(i)+" of "+str(file_count))
+                    i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([fsp,epoch,platform,sattype,str(sid),tile,bands,format(float(cloud),'.2f'),format(float(psia),'.4f'),format(float(psilaz),'.2f'),
-                        format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f'),psbrad,format(float(psb1ref),'.8f'),
-                        format(float(psb2ref),'.8f'),format(float(psb3ref),'.8f'),format(float(psb4ref),'.8f')])
+                        writer.writerow([eopfilename,epoch,productType,orbit,provider,instrument,satellite_id,tile_id,bands,epsg_code,resampling_kernel
+                                         ,number_rows,number_columns,format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
+                                         format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')
+                                         ,psbrad,format(float(psb1ref),'.8f'),format(float(psb2ref),'.8f'),format(float(psb3ref),'.8f'),
+                                         format(float(psb4ref),'.8f')])
                     csvfile.close()
                 except Exception as e:
                     print(infilename)
@@ -82,8 +79,15 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
 
         elif asset == 'PSO_DN': #PS OrthoTile Analytic Derivative DN
             folder = mf
+            path, dirs, files = next(os.walk(folder))
+            file_count = len(files)
+            i=1
             with open(mfile,'wb') as csvfile:
-                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "platform", "satType","satID", "tileID", "numBands", "cloudcover","incAngle","illAzAngle","illElvAngle","azAngle","spcAngle"], delimiter=',')
+                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "product_type",
+                                                          "orbit","provider","instrument","satellite_id","tile_id",
+                                                          "number_of_bands", "epsg_code","resampling_kernel",
+                                                          "number_of_rows","number_of_columns","gsd","cloud_cover","incidence_angle",
+                                                          "sun_azimuth","sun_elevation","azimuth_angle","spacecraft_angle"], delimiter=',')
                 writer.writeheader()
             with open(errorlog,'wb') as csvfile:
                 writer=csv.DictWriter(csvfile,fieldnames=["id_no"], delimiter=',')
@@ -95,56 +99,54 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     xmldoc = minidom.parse(infilename)
                     ps4band=xmldoc.getElementsByTagName('ps:EarthObservationMetaData')[0]
                     eopfilename = xmldoc.getElementsByTagName('eop:identifier')[0].firstChild.data
-                    sid=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
+                    productType = xmldoc.getElementsByTagName('eop:productType')[0].firstChild.data
+                    orbit = xmldoc.getElementsByTagName('eop:orbitType')[0].firstChild.data
                     acquisition = xmldoc.getElementsByTagName('eop:acquisitionDate')[0].firstChild.data
-                    platform=xmldoc.getElementsByTagName("eop:shortName")[0].firstChild.data
-                    tile=xmldoc.getElementsByTagName("ps:tileId")[0].firstChild.data
-                    sattype=xmldoc.getElementsByTagName("eop:shortName")[1].firstChild.data
+                    provider=xmldoc.getElementsByTagName("eop:shortName")[0].firstChild.data
+                    instrument=xmldoc.getElementsByTagName("eop:shortName")[1].firstChild.data
+                    satellite_id=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
+                    tile_id=xmldoc.getElementsByTagName("ps:tileId")[0].firstChild.data
                     bands=xmldoc.getElementsByTagName("ps:numBands")[0].firstChild.data
+                    epsg_code=xmldoc.getElementsByTagName("ps:epsgCode")[0].firstChild.data
+                    resampling_kernel=xmldoc.getElementsByTagName("ps:resamplingKernel")[0].firstChild.data
+                    number_rows=xmldoc.getElementsByTagName("ps:numRows")[0].firstChild.data
+                    number_columns=xmldoc.getElementsByTagName("ps:numColumns")[0].firstChild.data
+                    gsd=xmldoc.getElementsByTagName("ps:rowGsd")[0].firstChild.data
                     cloud=xmldoc.getElementsByTagName("opt:cloudCoverPercentage")[0].firstChild.data
-                    psb=xmldoc.getElementsByTagName("ps:bandNumber")[0].firstChild.data
-                    psb1=xmldoc.getElementsByTagName("ps:bandNumber")[1].firstChild.data
-                    psb3=xmldoc.getElementsByTagName("ps:bandNumber")[2].firstChild.data
-                    psb4=xmldoc.getElementsByTagName("ps:bandNumber")[3].firstChild.data
                     psia=xmldoc.getElementsByTagName("eop:incidenceAngle")[0].firstChild.data
                     psilaz=xmldoc.getElementsByTagName("opt:illuminationAzimuthAngle")[0].firstChild.data
                     psilelv=xmldoc.getElementsByTagName("opt:illuminationElevationAngle")[0].firstChild.data
                     psaz=xmldoc.getElementsByTagName("ps:azimuthAngle")[0].firstChild.data
                     pssca=xmldoc.getElementsByTagName("ps:spaceCraftViewAngle")[0].firstChild.data
-                    print ('ID_Name:', eopfilename.split('.')[0])
-                    print ('Acquisition Date:', acquisition.split('T')[0])
-                    print("Acquisition Date:", acquisition.split("T")[0])
-                    print("Satellite Type:", platform)
-                    print("ShortName:", sattype)
-                    print("Satellite ID:", str(sid))
-                    print("Tile ID:",tile)
-                    print("Number of Bands:", bands)
-                    print("Cloud Cover:", format(float(cloud),'.2f'))
-                    print("PS Incidence Angle",format(float(psia),'.4f'))
-                    print("PS illumination azimuth angle",format(float(psilaz),'.2f'))
-                    print("PS illumination elevation angle",format(float(psilelv),'.2f'))
-                    print("PS Azimuth angle",format(float(psaz),'.2f'))
-                    print("PS SpaceCraft angle",format(float(pssca),'.4f'))
                     date_time = acquisition.split('T')[0]
                     pattern = '%Y-%m-%d'
                     epoch = int(time.mktime(time.strptime(date_time, pattern))) * 1000
-                    print ('epoch time', epoch)
+                    print("Processing "+str(i)+" of "+str(file_count))
+                    i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([fsp,epoch,platform,sattype,str(sid),tile,bands,format(float(cloud),'.2f'),format(float(psia),'.4f'),format(float(psilaz),'.2f'),
-                        format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')])
+                        writer.writerow([eopfilename,epoch,productType,orbit,provider,instrument,satellite_id,tile_id,bands,epsg_code,resampling_kernel
+                                         ,number_rows,number_columns,format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
+                                         format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')])
                     csvfile.close()
                 except Exception as e:
                     print(infilename)
-                    print (e)
+                    print(e)
                     with open(errorlog,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
                         writer.writerow([infilename])
                     csvfile.close()
         elif asset == 'PSO_V': #PS OrthoTile Analytic Derivative Visual
             folder = mf
+            path, dirs, files = next(os.walk(folder))
+            file_count = len(files)
+            i=1
             with open(mfile,'wb') as csvfile:
-                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "platform", "satType","satID", "tileID", "numBands", "cloudcover","incAngle","illAzAngle","illElvAngle","azAngle","spcAngle"], delimiter=',')
+                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "product_type",
+                                                          "orbit","provider","instrument","satellite_id","tile_id",
+                                                          "number_of_bands", "epsg_code","resampling_kernel",
+                                                          "number_of_rows","number_of_columns","gsd","cloud_cover","incidence_angle",
+                                                          "sun_azimuth","sun_elevation","azimuth_angle","spacecraft_angle"], delimiter=',')
                 writer.writeheader()
             with open(errorlog,'wb') as csvfile:
                 writer=csv.DictWriter(csvfile,fieldnames=["id_no"], delimiter=',')
@@ -154,41 +156,37 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                 fsp = filename.split('_x')[0]
                 try:
                     xmldoc = minidom.parse(infilename)
+                    ps4band=xmldoc.getElementsByTagName('ps:EarthObservationMetaData')[0]
                     eopfilename = xmldoc.getElementsByTagName('eop:identifier')[0].firstChild.data
-                    sid=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
+                    productType = xmldoc.getElementsByTagName('eop:productType')[0].firstChild.data
+                    orbit = xmldoc.getElementsByTagName('eop:orbitType')[0].firstChild.data
                     acquisition = xmldoc.getElementsByTagName('eop:acquisitionDate')[0].firstChild.data
-                    platform=xmldoc.getElementsByTagName("eop:shortName")[0].firstChild.data
-                    tile=xmldoc.getElementsByTagName("ps:tileId")[0].firstChild.data
-                    sattype=xmldoc.getElementsByTagName("eop:shortName")[1].firstChild.data
+                    provider=xmldoc.getElementsByTagName("eop:shortName")[0].firstChild.data
+                    instrument=xmldoc.getElementsByTagName("eop:shortName")[1].firstChild.data
+                    satellite_id=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
+                    tile_id=xmldoc.getElementsByTagName("ps:tileId")[0].firstChild.data
                     bands=xmldoc.getElementsByTagName("ps:numBands")[0].firstChild.data
+                    epsg_code=xmldoc.getElementsByTagName("ps:epsgCode")[0].firstChild.data
+                    resampling_kernel=xmldoc.getElementsByTagName("ps:resamplingKernel")[0].firstChild.data
+                    number_rows=xmldoc.getElementsByTagName("ps:numRows")[0].firstChild.data
+                    number_columns=xmldoc.getElementsByTagName("ps:numColumns")[0].firstChild.data
+                    gsd=xmldoc.getElementsByTagName("ps:rowGsd")[0].firstChild.data
                     cloud=xmldoc.getElementsByTagName("opt:cloudCoverPercentage")[0].firstChild.data
                     psia=xmldoc.getElementsByTagName("eop:incidenceAngle")[0].firstChild.data
                     psilaz=xmldoc.getElementsByTagName("opt:illuminationAzimuthAngle")[0].firstChild.data
                     psilelv=xmldoc.getElementsByTagName("opt:illuminationElevationAngle")[0].firstChild.data
                     psaz=xmldoc.getElementsByTagName("ps:azimuthAngle")[0].firstChild.data
                     pssca=xmldoc.getElementsByTagName("ps:spaceCraftViewAngle")[0].firstChild.data
-                    print ('ID_Name:', eopfilename.split('.')[0])
-                    print ('Acquisition Date:', acquisition.split('T')[0])
-                    print("Acquisition Date:", acquisition.split("T")[0])
-                    print("Satellite Type:", platform)
-                    print("ShortName:", sattype)
-                    print("Satellite ID:", str(sid))
-                    print("Tile ID:",tile)
-                    print("Number of Bands:", bands)
-                    print("Cloud Cover:", format(float(cloud),'.2f'))
-                    print("PS Incidence Angle",format(float(psia),'.4f'))
-                    print("PS illumination azimuth angle",format(float(psilaz),'.2f'))
-                    print("PS illumination elevation angle",format(float(psilelv),'.2f'))
-                    print("PS Azimuth angle",format(float(psaz),'.2f'))
-                    print("PS SpaceCraft angle",format(float(pssca),'.4f'))
                     date_time = acquisition.split('T')[0]
                     pattern = '%Y-%m-%d'
                     epoch = int(time.mktime(time.strptime(date_time, pattern))) * 1000
-                    print ('epoch time', epoch)
+                    print("Processing "+str(i)+" of "+str(file_count))
+                    i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([fsp,epoch,platform,sattype,str(sid),tile,bands,format(float(cloud),'.2f'),format(float(psia),'.4f'),format(float(psilaz),'.2f'),
-                        format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')])
+                        writer.writerow([eopfilename,epoch,productType,orbit,provider,instrument,satellite_id,tile_id,bands,epsg_code,resampling_kernel
+                                         ,number_rows,number_columns,format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
+                                         format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')])
                     csvfile.close()
                 except Exception as e:
                     print(infilename)
@@ -199,8 +197,18 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     csvfile.close()
         elif asset == 'PS4B': #PS 4 Band Scene Derivative Analytic
             folder = mf
+            path, dirs, files = next(os.walk(folder))
+            file_count = len(files)
+            i=1
             with open(mfile,'wb') as csvfile:
-                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "platform", "satType","satID", "numBands", "cloudcover","incAngle","illAzAngle","illElvAngle","azAngle","spcAngle","rsf","refCoeffB1","refCoeffB2","refCoeffB3","refCoeffB4"], delimiter=',')
+                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "product_type",
+                                                          "orbit","provider","instrument","satellite_id",
+                                                          "number_of_bands", "epsg_code","resampling_kernel",
+                                                          "number_of_rows","number_of_columns","gsd","cloud_cover","incidence_angle",
+                                                          "sun_azimuth","sun_elevation","azimuth_angle","spacecraft_angle",
+                                                          "radiometric_scale_factor","reflectance_coefficient_b1",
+                                                          "reflectance_coefficient_b2","reflectance_coefficient_b3",
+                                                          "reflectance_coefficient_b4"], delimiter=',')
                 writer.writeheader()
             with open(errorlog,'wb') as csvfile:
                 writer=csv.DictWriter(csvfile,fieldnames=["id_no"], delimiter=',')
@@ -212,11 +220,18 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     xmldoc = minidom.parse(infilename)
                     ps4band=xmldoc.getElementsByTagName('ps:EarthObservationMetaData')[0]
                     eopfilename = xmldoc.getElementsByTagName('eop:identifier')[0].firstChild.data
+                    productType = xmldoc.getElementsByTagName('eop:productType')[0].firstChild.data
+                    orbit = xmldoc.getElementsByTagName('eop:orbitType')[0].firstChild.data
                     acquisition = xmldoc.getElementsByTagName('eop:acquisitionDate')[0].firstChild.data
-                    sid=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
-                    sattype=xmldoc.getElementsByTagName("eop:shortName")[1].firstChild.data
-                    platform=xmldoc.getElementsByTagName("eop:shortName")[0].firstChild.data
+                    provider=xmldoc.getElementsByTagName("eop:shortName")[0].firstChild.data
+                    instrument=xmldoc.getElementsByTagName("eop:shortName")[1].firstChild.data
+                    satellite_id=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
                     bands=xmldoc.getElementsByTagName("ps:numBands")[0].firstChild.data
+                    epsg_code=xmldoc.getElementsByTagName("ps:epsgCode")[0].firstChild.data
+                    resampling_kernel=xmldoc.getElementsByTagName("ps:resamplingKernel")[0].firstChild.data
+                    number_rows=xmldoc.getElementsByTagName("ps:numRows")[0].firstChild.data
+                    number_columns=xmldoc.getElementsByTagName("ps:numColumns")[0].firstChild.data
+                    gsd=xmldoc.getElementsByTagName("ps:rowGsd")[0].firstChild.data
                     cloud=xmldoc.getElementsByTagName("opt:cloudCoverPercentage")[0].firstChild.data
                     psb=xmldoc.getElementsByTagName("ps:bandNumber")[0].firstChild.data
                     psb1=xmldoc.getElementsByTagName("ps:bandNumber")[1].firstChild.data
@@ -232,31 +247,18 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     psilelv=xmldoc.getElementsByTagName("opt:illuminationElevationAngle")[0].firstChild.data
                     psaz=xmldoc.getElementsByTagName("ps:azimuthAngle")[0].firstChild.data
                     pssca=xmldoc.getElementsByTagName("ps:spaceCraftViewAngle")[0].firstChild.data
-                    print ('ID_Name:', eopfilename.split('.')[0])
-                    print ('Acquisition Date:', acquisition.split('T')[0])
-                    print("Acquisition Date:", acquisition.split("T")[0])
-                    print("ShortName:", sattype)
-                    print("Satellite ID:", str(sid))
-                    print("Number of Bands:", bands)
-                    print("Cloud Cover:", format(float(cloud),'.2f'))
-                    print("PS Incidence Angle",format(float(psia),'.4f'))
-                    print("PS illumination azimuth angle",format(float(psilaz),'.2f'))
-                    print("PS illumination elevation angle",format(float(psilelv),'.2f'))
-                    print("PS Azimuth angle",format(float(psaz),'.2f'))
-                    print("PS SpaceCraft angle",format(float(pssca),'.4f'))
-                    print("Radiometric Scale Factor",psbrad)
-                    print("ReflectanceCoefficient B1",format(float(psb1ref),'.8f'))
-                    print("ReflectanceCoefficient B2",format(float(psb2ref),'.8f'))
-                    print("ReflectanceCoefficient B3",format(float(psb3ref),'.8f'))
-                    print("ReflectanceCoefficient B4",format(float(psb4ref),'.8f'))
                     date_time = acquisition.split('T')[0]
                     pattern = '%Y-%m-%d'
                     epoch = int(time.mktime(time.strptime(date_time, pattern))) * 1000
+                    print("Processing "+str(i)+" of "+str(file_count))
+                    i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([fsp,epoch,platform,sattype,str(sid),bands,format(float(cloud),'.2f'),format(float(psia),'.4f'),format(float(psilaz),'.2f'),
-                        format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f'),psbrad,format(float(psb1ref),'.8f'),
-                        format(float(psb2ref),'.8f'),format(float(psb3ref),'.8f'),format(float(psb4ref),'.8f')])
+                        writer.writerow([eopfilename,epoch,productType,orbit,provider,instrument,satellite_id,bands,epsg_code,resampling_kernel
+                                         ,number_rows,number_columns,format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
+                                         format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')
+                                         ,psbrad,format(float(psb1ref),'.8f'),format(float(psb2ref),'.8f'),format(float(psb3ref),'.8f'),
+                                         format(float(psb4ref),'.8f')])
                     csvfile.close()
                 except Exception as e:
                     print(infilename)
@@ -267,8 +269,15 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     csvfile.close()
         elif asset == 'PS4B_DN': #PS 4 Band Scene Derivative DN
             folder = mf
+            path, dirs, files = next(os.walk(folder))
+            file_count = len(files)
+            i=1
             with open(mfile,'wb') as csvfile:
-                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "platform", "satType","satID", "numBands", "cloudcover","incAngle","illAzAngle","illElvAngle","azAngle","spcAngle"], delimiter=',')
+                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "product_type",
+                                                          "orbit","provider","instrument","satellite_id",
+                                                          "number_of_bands", "epsg_code","resampling_kernel",
+                                                          "number_of_rows","number_of_columns","gsd","cloud_cover","incidence_angle",
+                                                          "sun_azimuth","sun_elevation","azimuth_angle","spacecraft_angle"], delimiter=',')
                 writer.writeheader()
             with open(errorlog,'wb') as csvfile:
                 writer=csv.DictWriter(csvfile,fieldnames=["id_no"], delimiter=',')
@@ -278,37 +287,40 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                 fsp = filename.split('_x')[0]
                 try:
                     xmldoc = minidom.parse(infilename)
+                    ps4band=xmldoc.getElementsByTagName('ps:EarthObservationMetaData')[0]
                     eopfilename = xmldoc.getElementsByTagName('eop:identifier')[0].firstChild.data
+                    productType = xmldoc.getElementsByTagName('eop:productType')[0].firstChild.data
+                    orbit = xmldoc.getElementsByTagName('eop:orbitType')[0].firstChild.data
                     acquisition = xmldoc.getElementsByTagName('eop:acquisitionDate')[0].firstChild.data
+                    provider=xmldoc.getElementsByTagName("eop:shortName")[0].firstChild.data
+                    instrument=xmldoc.getElementsByTagName("eop:shortName")[1].firstChild.data
+                    satellite_id=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
                     bands=xmldoc.getElementsByTagName("ps:numBands")[0].firstChild.data
-                    platform=xmldoc.getElementsByTagName("eop:shortName")[0].firstChild.data
-                    sid=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
-                    sattype=xmldoc.getElementsByTagName("eop:shortName")[1].firstChild.data
+                    epsg_code=xmldoc.getElementsByTagName("ps:epsgCode")[0].firstChild.data
+                    resampling_kernel=xmldoc.getElementsByTagName("ps:resamplingKernel")[0].firstChild.data
+                    number_rows=xmldoc.getElementsByTagName("ps:numRows")[0].firstChild.data
+                    number_columns=xmldoc.getElementsByTagName("ps:numColumns")[0].firstChild.data
+                    gsd=xmldoc.getElementsByTagName("ps:rowGsd")[0].firstChild.data
                     cloud=xmldoc.getElementsByTagName("opt:cloudCoverPercentage")[0].firstChild.data
+                    psb=xmldoc.getElementsByTagName("ps:bandNumber")[0].firstChild.data
+                    psb1=xmldoc.getElementsByTagName("ps:bandNumber")[1].firstChild.data
+                    psb3=xmldoc.getElementsByTagName("ps:bandNumber")[2].firstChild.data
+                    psb4=xmldoc.getElementsByTagName("ps:bandNumber")[3].firstChild.data
                     psia=xmldoc.getElementsByTagName("eop:incidenceAngle")[0].firstChild.data
                     psilaz=xmldoc.getElementsByTagName("opt:illuminationAzimuthAngle")[0].firstChild.data
                     psilelv=xmldoc.getElementsByTagName("opt:illuminationElevationAngle")[0].firstChild.data
                     psaz=xmldoc.getElementsByTagName("ps:azimuthAngle")[0].firstChild.data
                     pssca=xmldoc.getElementsByTagName("ps:spaceCraftViewAngle")[0].firstChild.data
-                    print ('ID_Name:', eopfilename.split('.')[0])
-                    print ('Acquisition Date:', acquisition.split('T')[0])
-                    print("Acquisition Date:", acquisition.split("T")[0])
-                    print("Satellite Type:", platform)
-                    print("ShortName:", sattype)
-                    print("Number of Bands:", bands)
-                    print("Cloud Cover:", format(float(cloud),'.2f'))
-                    print("PS Incidence Angle",format(float(psia),'.4f'))
-                    print("PS illumination azimuth angle",format(float(psilaz),'.2f'))
-                    print("PS illumination elevation angle",format(float(psilelv),'.2f'))
-                    print("PS Azimuth angle",format(float(psaz),'.2f'))
-                    print("PS SpaceCraft angle",format(float(pssca),'.4f'))
                     date_time = acquisition.split('T')[0]
                     pattern = '%Y-%m-%d'
                     epoch = int(time.mktime(time.strptime(date_time, pattern))) * 1000
+                    print("Processing "+str(i)+" of "+str(file_count))
+                    i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([fsp,epoch,platform,sattype,str(sid),bands,format(float(cloud),'.2f'),format(float(psia),'.4f'),format(float(psilaz),'.2f'),
-                        format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')])
+                        writer.writerow([eopfilename,epoch,productType,orbit,provider,instrument,satellite_id,bands,epsg_code,resampling_kernel
+                                         ,number_rows,number_columns,format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
+                                         format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')])
                     csvfile.close()
                 except Exception as e:
                     print(infilename)
@@ -317,10 +329,19 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
                         writer.writerow([infilename])
                     csvfile.close()
-        elif asset == 'PS3B': #PS 3 Band Scene Derivative Analytic
+        elif asset == 'PS3B': #PS 3 Band Scene Derivative Analytic Work from here
             folder = mf
+            path, dirs, files = next(os.walk(folder))
+            file_count = len(files)
+            i=1
             with open(mfile,'wb') as csvfile:
-                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "platform", "satType","satID", "numBands", "cloudcover","incAngle","illAzAngle","illElvAngle","azAngle","spcAngle","rsf","refCoeffB1","refCoeffB2","refCoeffB3"], delimiter=',')
+                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "product_type",
+                                                          "orbit","provider","instrument","satellite_id",
+                                                          "number_of_bands", "epsg_code","resampling_kernel",
+                                                          "number_of_rows","number_of_columns","gsd","cloud_cover","incidence_angle",
+                                                          "sun_azimuth","sun_elevation","azimuth_angle","spacecraft_angle",
+                                                          "radiometric_scale_factor","reflectance_coefficient_b1",
+                                                          "reflectance_coefficient_b2","reflectance_coefficient_b3"], delimiter=',')
                 writer.writeheader()
             with open(errorlog,'wb') as csvfile:
                 writer=csv.DictWriter(csvfile,fieldnames=["id_no"], delimiter=',')
@@ -328,15 +349,22 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
             for filename in os.listdir(folder):
                 infilename = os.path.join(folder, filename)
                 fsp = filename.split('_x')[0]
-                print(fsp)
                 try:
                     xmldoc = minidom.parse(infilename)
+                    ps4band=xmldoc.getElementsByTagName('ps:EarthObservationMetaData')[0]
                     eopfilename = xmldoc.getElementsByTagName('eop:identifier')[0].firstChild.data
+                    productType = xmldoc.getElementsByTagName('eop:productType')[0].firstChild.data
+                    orbit = xmldoc.getElementsByTagName('eop:orbitType')[0].firstChild.data
                     acquisition = xmldoc.getElementsByTagName('eop:acquisitionDate')[0].firstChild.data
-                    sid=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
-                    platform=xmldoc.getElementsByTagName("eop:shortName")[0].firstChild.data
-                    sattype=xmldoc.getElementsByTagName("eop:shortName")[1].firstChild.data
+                    provider=xmldoc.getElementsByTagName("eop:shortName")[0].firstChild.data
+                    instrument=xmldoc.getElementsByTagName("eop:shortName")[1].firstChild.data
+                    satellite_id=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
                     bands=xmldoc.getElementsByTagName("ps:numBands")[0].firstChild.data
+                    epsg_code=xmldoc.getElementsByTagName("ps:epsgCode")[0].firstChild.data
+                    resampling_kernel=xmldoc.getElementsByTagName("ps:resamplingKernel")[0].firstChild.data
+                    number_rows=xmldoc.getElementsByTagName("ps:numRows")[0].firstChild.data
+                    number_columns=xmldoc.getElementsByTagName("ps:numColumns")[0].firstChild.data
+                    gsd=xmldoc.getElementsByTagName("ps:rowGsd")[0].firstChild.data
                     cloud=xmldoc.getElementsByTagName("opt:cloudCoverPercentage")[0].firstChild.data
                     psb=xmldoc.getElementsByTagName("ps:bandNumber")[0].firstChild.data
                     psb1=xmldoc.getElementsByTagName("ps:bandNumber")[1].firstChild.data
@@ -350,30 +378,17 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     psilelv=xmldoc.getElementsByTagName("opt:illuminationElevationAngle")[0].firstChild.data
                     psaz=xmldoc.getElementsByTagName("ps:azimuthAngle")[0].firstChild.data
                     pssca=xmldoc.getElementsByTagName("ps:spaceCraftViewAngle")[0].firstChild.data
-                    print ('ID_Name:', eopfilename.split('.')[0])
-                    print ('Acquisition Date:', acquisition.split('T')[0])
-                    print("Acquisition Date:", acquisition.split("T")[0])
-                    print("ShortName:", sattype)
-                    print("Satellite ID:", str(sid))
-                    print("Number of Bands:", bands)
-                    print("Cloud Cover:", format(float(cloud),'.2f'))
-                    print("PS Incidence Angle",format(float(psia),'.4f'))
-                    print("PS illumination azimuth angle",format(float(psilaz),'.2f'))
-                    print("PS illumination elevation angle",format(float(psilelv),'.2f'))
-                    print("PS Azimuth angle",format(float(psaz),'.2f'))
-                    print("PS SpaceCraft angle",format(float(pssca),'.4f'))
-                    print("Radiometric Scale Factor",psbrad)
-                    print("ReflectanceCoefficient B1",format(float(psb1ref),'.8f'))
-                    print("ReflectanceCoefficient B2",format(float(psb2ref),'.8f'))
-                    print("ReflectanceCoefficient B3",format(float(psb3ref),'.8f'))
                     date_time = acquisition.split('T')[0]
                     pattern = '%Y-%m-%d'
                     epoch = int(time.mktime(time.strptime(date_time, pattern))) * 1000
+                    print("Processing "+str(i)+" of "+str(file_count))
+                    i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([fsp,epoch,platform,sattype,str(sid),bands,format(float(cloud),'.2f'),format(float(psia),'.4f'),format(float(psilaz),'.2f'),
-                        format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f'),psbrad,format(float(psb1ref),'.8f'),
-                        format(float(psb2ref),'.8f'),format(float(psb3ref),'.8f')])
+                        writer.writerow([eopfilename,epoch,productType,orbit,provider,instrument,satellite_id,bands,epsg_code,resampling_kernel
+                                         ,number_rows,number_columns,format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
+                                         format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')
+                                         ,psbrad,format(float(psb1ref),'.8f'),format(float(psb2ref),'.8f'),format(float(psb3ref),'.8f')])
                     csvfile.close()
                 except Exception as e:
                     print(infilename)
@@ -384,8 +399,15 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     csvfile.close()
         elif asset == 'PS3B_DN': #PS 3 Band Scene Derivative DN
             folder = mf
+            path, dirs, files = next(os.walk(folder))
+            file_count = len(files)
+            i=1
             with open(mfile,'wb') as csvfile:
-                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "platform", "satType","satID", "numBands", "cloudcover","incAngle","illAzAngle","illElvAngle","azAngle","spcAngle"], delimiter=',')
+                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "product_type",
+                                                          "orbit","provider","instrument","satellite_id",
+                                                          "number_of_bands", "epsg_code","resampling_kernel",
+                                                          "number_of_rows","number_of_columns","gsd","cloud_cover","incidence_angle",
+                                                          "sun_azimuth","sun_elevation","azimuth_angle","spacecraft_angle"], delimiter=',')
                 writer.writeheader()
             with open(errorlog,'wb') as csvfile:
                 writer=csv.DictWriter(csvfile,fieldnames=["id_no"], delimiter=',')
@@ -395,37 +417,39 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                 fsp = filename.split('_x')[0]
                 try:
                     xmldoc = minidom.parse(infilename)
+                    ps4band=xmldoc.getElementsByTagName('ps:EarthObservationMetaData')[0]
                     eopfilename = xmldoc.getElementsByTagName('eop:identifier')[0].firstChild.data
+                    productType = xmldoc.getElementsByTagName('eop:productType')[0].firstChild.data
+                    orbit = xmldoc.getElementsByTagName('eop:orbitType')[0].firstChild.data
                     acquisition = xmldoc.getElementsByTagName('eop:acquisitionDate')[0].firstChild.data
-                    sid=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
+                    provider=xmldoc.getElementsByTagName("eop:shortName")[0].firstChild.data
+                    instrument=xmldoc.getElementsByTagName("eop:shortName")[1].firstChild.data
+                    satellite_id=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
                     bands=xmldoc.getElementsByTagName("ps:numBands")[0].firstChild.data
-                    platform=xmldoc.getElementsByTagName("eop:shortName")[0].firstChild.data
-                    sattype=xmldoc.getElementsByTagName("eop:shortName")[1].firstChild.data
+                    epsg_code=xmldoc.getElementsByTagName("ps:epsgCode")[0].firstChild.data
+                    resampling_kernel=xmldoc.getElementsByTagName("ps:resamplingKernel")[0].firstChild.data
+                    number_rows=xmldoc.getElementsByTagName("ps:numRows")[0].firstChild.data
+                    number_columns=xmldoc.getElementsByTagName("ps:numColumns")[0].firstChild.data
+                    gsd=xmldoc.getElementsByTagName("ps:rowGsd")[0].firstChild.data
                     cloud=xmldoc.getElementsByTagName("opt:cloudCoverPercentage")[0].firstChild.data
+                    psb=xmldoc.getElementsByTagName("ps:bandNumber")[0].firstChild.data
+                    psb1=xmldoc.getElementsByTagName("ps:bandNumber")[1].firstChild.data
+                    psb3=xmldoc.getElementsByTagName("ps:bandNumber")[2].firstChild.data
                     psia=xmldoc.getElementsByTagName("eop:incidenceAngle")[0].firstChild.data
                     psilaz=xmldoc.getElementsByTagName("opt:illuminationAzimuthAngle")[0].firstChild.data
                     psilelv=xmldoc.getElementsByTagName("opt:illuminationElevationAngle")[0].firstChild.data
                     psaz=xmldoc.getElementsByTagName("ps:azimuthAngle")[0].firstChild.data
                     pssca=xmldoc.getElementsByTagName("ps:spaceCraftViewAngle")[0].firstChild.data
-                    print ('ID_Name:', eopfilename.split('.')[0])
-                    print ('Acquisition Date:', acquisition.split('T')[0])
-                    print("Acquisition Date:", acquisition.split("T")[0])
-                    print("Satellite Type:", platform)
-                    print("ShortName:", sattype)
-                    print("Number of Bands:", bands)
-                    print("Cloud Cover:", format(float(cloud),'.2f'))
-                    print("PS Incidence Angle",format(float(psia),'.4f'))
-                    print("PS illumination azimuth angle",format(float(psilaz),'.2f'))
-                    print("PS illumination elevation angle",format(float(psilelv),'.2f'))
-                    print("PS Azimuth angle",format(float(psaz),'.2f'))
-                    print("PS SpaceCraft angle",format(float(pssca),'.4f'))
                     date_time = acquisition.split('T')[0]
                     pattern = '%Y-%m-%d'
                     epoch = int(time.mktime(time.strptime(date_time, pattern))) * 1000
+                    print("Processing "+str(i)+" of "+str(file_count))
+                    i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([fsp,epoch,platform,sattype,str(sid),bands,format(float(cloud),'.2f'),format(float(psia),'.4f'),format(float(psilaz),'.2f'),
-                        format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')])
+                        writer.writerow([eopfilename,epoch,productType,orbit,provider,instrument,satellite_id,bands,epsg_code,resampling_kernel
+                                         ,number_rows,number_columns,format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
+                                         format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')])
                     csvfile.close()
                 except Exception as e:
                     print(infilename)
@@ -436,8 +460,15 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     csvfile.close()
         elif asset == 'PS3B_V': #PS 3 Band Scene Derivative Visual
             folder = mf
+            path, dirs, files = next(os.walk(folder))
+            file_count = len(files)
+            i=1
             with open(mfile,'wb') as csvfile:
-                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "platform", "satType","satID", "numBands", "cloudcover","incAngle","illAzAngle","illElvAngle","azAngle","spcAngle"], delimiter=',')
+                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "product_type",
+                                                          "orbit","provider","instrument","satellite_id",
+                                                          "number_of_bands", "epsg_code","resampling_kernel",
+                                                          "number_of_rows","number_of_columns","gsd","cloud_cover","incidence_angle",
+                                                          "sun_azimuth","sun_elevation","azimuth_angle","spacecraft_angle"], delimiter=',')
                 writer.writeheader()
             with open(errorlog,'wb') as csvfile:
                 writer=csv.DictWriter(csvfile,fieldnames=["id_no"], delimiter=',')
@@ -447,38 +478,39 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                 fsp = filename.split('_x')[0]
                 try:
                     xmldoc = minidom.parse(infilename)
+                    ps4band=xmldoc.getElementsByTagName('ps:EarthObservationMetaData')[0]
                     eopfilename = xmldoc.getElementsByTagName('eop:identifier')[0].firstChild.data
+                    productType = xmldoc.getElementsByTagName('eop:productType')[0].firstChild.data
+                    orbit = xmldoc.getElementsByTagName('eop:orbitType')[0].firstChild.data
                     acquisition = xmldoc.getElementsByTagName('eop:acquisitionDate')[0].firstChild.data
+                    provider=xmldoc.getElementsByTagName("eop:shortName")[0].firstChild.data
+                    instrument=xmldoc.getElementsByTagName("eop:shortName")[1].firstChild.data
+                    satellite_id=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
                     bands=xmldoc.getElementsByTagName("ps:numBands")[0].firstChild.data
-                    platform=xmldoc.getElementsByTagName("eop:shortName")[0].firstChild.data
-                    sid=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
-                    sattype=xmldoc.getElementsByTagName("eop:shortName")[1].firstChild.data
+                    epsg_code=xmldoc.getElementsByTagName("ps:epsgCode")[0].firstChild.data
+                    resampling_kernel=xmldoc.getElementsByTagName("ps:resamplingKernel")[0].firstChild.data
+                    number_rows=xmldoc.getElementsByTagName("ps:numRows")[0].firstChild.data
+                    number_columns=xmldoc.getElementsByTagName("ps:numColumns")[0].firstChild.data
+                    gsd=xmldoc.getElementsByTagName("ps:rowGsd")[0].firstChild.data
                     cloud=xmldoc.getElementsByTagName("opt:cloudCoverPercentage")[0].firstChild.data
+                    psb=xmldoc.getElementsByTagName("ps:bandNumber")[0].firstChild.data
+                    psb1=xmldoc.getElementsByTagName("ps:bandNumber")[1].firstChild.data
+                    psb3=xmldoc.getElementsByTagName("ps:bandNumber")[2].firstChild.data
                     psia=xmldoc.getElementsByTagName("eop:incidenceAngle")[0].firstChild.data
                     psilaz=xmldoc.getElementsByTagName("opt:illuminationAzimuthAngle")[0].firstChild.data
                     psilelv=xmldoc.getElementsByTagName("opt:illuminationElevationAngle")[0].firstChild.data
                     psaz=xmldoc.getElementsByTagName("ps:azimuthAngle")[0].firstChild.data
                     pssca=xmldoc.getElementsByTagName("ps:spaceCraftViewAngle")[0].firstChild.data
-                    print ('ID_Name:', eopfilename.split('.')[0])
-                    print ('Acquisition Date:', acquisition.split('T')[0])
-                    print("Acquisition Date:", acquisition.split("T")[0])
-                    print("Satellite Type:", platform)
-                    print("ShortName:", sattype)
-                    print("Number of Bands:", bands)
-                    print("Cloud Cover:", format(float(cloud),'.2f'))
-                    print("PS Incidence Angle",format(float(psia),'.4f'))
-                    print("PS illumination azimuth angle",format(float(psilaz),'.2f'))
-                    print("PS illumination elevation angle",format(float(psilelv),'.2f'))
-                    print("PS Azimuth angle",format(float(psaz),'.2f'))
-                    print("PS SpaceCraft angle",format(float(pssca),'.4f'))
                     date_time = acquisition.split('T')[0]
                     pattern = '%Y-%m-%d'
                     epoch = int(time.mktime(time.strptime(date_time, pattern))) * 1000
-                    print ('epoch time', epoch)
+                    print("Processing "+str(i)+" of "+str(file_count))
+                    i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([fsp,epoch,platform,sattype,str(sid),bands,format(float(cloud),'.2f'),format(float(psia),'.4f'),format(float(psilaz),'.2f'),
-                        format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')])
+                        writer.writerow([eopfilename,epoch,productType,orbit,provider,instrument,satellite_id,bands,epsg_code,resampling_kernel
+                                         ,number_rows,number_columns,format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
+                                         format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')])
                     csvfile.close()
                 except Exception as e:
                     print(infilename)
@@ -486,58 +518,66 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     with open(errorlog,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
                         writer.writerow([infilename])
-                    csvfile.close()               
+                    csvfile.close()
         elif asset == 'REO':
             folder = mf
-            with open(mfile,'wb') as csvfile:
-                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "platform", "satID", "tileID", "numBands", "cloudcover","incAngle","illAzAngle","illElvAngle","azAngle","spcAngle","rsf"], delimiter=',')
+            path, dirs, files = next(os.walk(folder))
+            file_count = len(files)
+            i=1
+            with open(mfile,'wb') as csvfile:              
+                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "product_type",
+                                                          "tile_id","order_id","orbit","provider",
+                                                          "instrument","satellite_id","number_of_bands",
+                                                          "epsg_code","resampling_kernel",
+                                                          "number_of_rows","number_of_columns","gsd","cloud_cover",
+                                                          "incidence_angle",
+                                                          "sun_azimuth","sun_elevation","azimuth_angle","spacecraft_angle",
+                                                          "radiometric_scale_factor"], delimiter=',')
                 writer.writeheader()
             with open(errorlog,'wb') as csvfile:
                 writer=csv.DictWriter(csvfile,fieldnames=["id_no"], delimiter=',')
                 writer.writeheader()
             for filename in os.listdir(folder):
-                print(filename)
                 infilename = os.path.join(folder,filename)
                 fsp=filename.split("_x")[0]
                 try:
                     xmldoc=minidom.parse(infilename)
                     re=xmldoc.getElementsByTagName("re:EarthObservationMetaData")[0]
-                    eopfilename=xmldoc.getElementsByTagName("eop:identifier")[0].firstChild.data
-                    product=xmldoc.getElementsByTagName("re:EarthObservationResult")[0]
-                    bands=product.getElementsByTagName("re:numBands")[0].firstChild.data
-                    downlink=xmldoc.getElementsByTagName("eop:downlinkedTo")[0]
-                    acquisition= downlink.getElementsByTagName("eop:acquisitionDate")[0].firstChild.data
-                    tile=xmldoc.getElementsByTagName("re:tileId")[0].firstChild.data
-                    equip=xmldoc.getElementsByTagName("eop:EarthObservationEquipment")[0]
-                    platform=equip.getElementsByTagName("eop:shortName")[0].firstChild.data
-                    sid=equip.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
+                    id_no=xmldoc.getElementsByTagName("eop:identifier")[0].firstChild.data
+                    productType=xmldoc.getElementsByTagName("eop:productType")[0].firstChild.data
+                    acquisition = xmldoc.getElementsByTagName('eop:acquisitionDate')[0].firstChild.data
+                    tile_id=xmldoc.getElementsByTagName("re:tileId")[0].firstChild.data
+                    order_id=xmldoc.getElementsByTagName("re:orderId")[0].firstChild.data
+                    orbit=xmldoc.getElementsByTagName("eop:orbitType")[0].firstChild.data
+                    provider=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data.split('-')[0]
+                    instrument=xmldoc.getElementsByTagName("eop:shortName")[0].firstChild.data
+                    satellite_id=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
+                    number_of_bands=xmldoc.getElementsByTagName("re:numBands")[0].firstChild.data
+                    epsg_code=xmldoc.getElementsByTagName("re:epsgCode")[0].firstChild.data
+                    resampling_kernel=xmldoc.getElementsByTagName("re:resamplingKernel")[0].firstChild.data
+                    number_rows=xmldoc.getElementsByTagName("re:numRows")[0].firstChild.data
+                    number_columns=xmldoc.getElementsByTagName("re:numColumns")[0].firstChild.data
+                    gsd=xmldoc.getElementsByTagName("re:rowGsd")[0].firstChild.data
                     cloud=xmldoc.getElementsByTagName("opt:cloudCoverPercentage")[0].firstChild.data
-                    date_time = acquisition.split("T")[0]
-                    pattern = '%Y-%m-%d'
-                    epoch = int(time.mktime(time.strptime(date_time, pattern)))*1000
                     psia=xmldoc.getElementsByTagName("eop:incidenceAngle")[0].firstChild.data
                     psilaz=xmldoc.getElementsByTagName("opt:illuminationAzimuthAngle")[0].firstChild.data
                     psilelv=xmldoc.getElementsByTagName("opt:illuminationElevationAngle")[0].firstChild.data
                     psaz=xmldoc.getElementsByTagName("re:azimuthAngle")[0].firstChild.data
                     pssca=xmldoc.getElementsByTagName("re:spaceCraftViewAngle")[0].firstChild.data
                     psrad=xmldoc.getElementsByTagName("re:radiometricScaleFactor")[0].firstChild.data
-                    print("ID_Name:", eopfilename.split(".")[0])
-                    print("Acquisition Date:", acquisition.split("T")[0])
-                    print("Satellite Type:", str(platform))
-                    print("Satellite ID:", str(sid))
-                    print("Tile ID:", tile)
-                    print("Number of Bands:", bands)
-                    print("Cloud Cover:", format(float(cloud),'.2f'))
-                    print("Epoch Time:",epoch)
-                    print("RE Incidence Angle",format(float(psia),'.4f'))
-                    print("RE illumination azimuth angle",format(float(psilaz),'.2f'))
-                    print("RE illumination elevation angle",format(float(psilelv),'.2f'))
-                    print("RE Azimuth angle",format(float(psaz),'.2f'))
-                    print("RE SpaceCraft angle",format(float(pssca),'.4f'))
-                    print("Radiometric Scale Factor", format(float(psrad),'.18f'))
+                    date_time = acquisition.split("T")[0]
+                    pattern = '%Y-%m-%d'
+                    epoch = int(time.mktime(time.strptime(date_time, pattern)))*1000
+                    print("Processing "+str(i)+" of "+str(file_count))
+                    i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([fsp,epoch,str(platform),str(sid),tile,bands,format(float(cloud),'.2f'),format(float(psia),'.4f'),format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f'),format(float(psrad),'.18f')])
+                        writer.writerow([id_no,epoch,str(productType),str(tile_id),str(order_id),
+                                         str(orbit),str(provider),str(instrument),str(satellite_id),
+                                         number_of_bands,epsg_code,resampling_kernel,number_rows,number_columns,
+                                         format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
+                                         format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),
+                                         format(float(pssca),'.4f'),format(float(psrad),'.18f')])
                     csvfile.close()
                 except Exception as e:
                     print(infilename)
@@ -548,52 +588,63 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     csvfile.close()
         elif asset == 'REO_V':
             folder = mf
-            with open(mfile,'wb') as csvfile:
-                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "platform", "satID", "tileID", "numBands", "cloudcover","incAngle","illAzAngle","illElvAngle","azAngle","spcAngle","rsf"], delimiter=',')
+            path, dirs, files = next(os.walk(folder))
+            file_count = len(files)
+            i=1
+            with open(mfile,'wb') as csvfile:              
+                writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "product_type",
+                                                          "tile_id","order_id","orbit","provider",
+                                                          "instrument","satellite_id","number_of_bands",
+                                                          "epsg_code","resampling_kernel",
+                                                          "number_of_rows","number_of_columns","gsd","cloud_cover",
+                                                          "incidence_angle",
+                                                          "sun_azimuth","sun_elevation","azimuth_angle","spacecraft_angle",
+                                                          "radiometric_scale_factor"], delimiter=',')
                 writer.writeheader()
             with open(errorlog,'wb') as csvfile:
                 writer=csv.DictWriter(csvfile,fieldnames=["id_no"], delimiter=',')
                 writer.writeheader()
             for filename in os.listdir(folder):
-                print(filename)
                 infilename = os.path.join(folder,filename)
                 fsp=filename.split("_x")[0]
                 try:
                     xmldoc=minidom.parse(infilename)
-                    eopfilename=xmldoc.getElementsByTagName("eop:identifier")[0].firstChild.data
-                    bands=xmldoc.getElementsByTagName("re:numBands")[0].firstChild.data
-                    acquisition= xmldoc.getElementsByTagName("eop:acquisitionDate")[0].firstChild.data
-                    tile=xmldoc.getElementsByTagName("re:tileId")[0].firstChild.data
-                    equip=xmldoc.getElementsByTagName("eop:EarthObservationEquipment")[0]
-                    platform=equip.getElementsByTagName("eop:shortName")[0].firstChild.data
-                    sid=equip.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
+                    re=xmldoc.getElementsByTagName("re:EarthObservationMetaData")[0]
+                    id_no=xmldoc.getElementsByTagName("eop:identifier")[0].firstChild.data
+                    productType=xmldoc.getElementsByTagName("eop:productType")[0].firstChild.data
+                    acquisition = xmldoc.getElementsByTagName('eop:acquisitionDate')[0].firstChild.data
+                    tile_id=xmldoc.getElementsByTagName("re:tileId")[0].firstChild.data
+                    order_id=xmldoc.getElementsByTagName("re:orderId")[0].firstChild.data
+                    orbit=xmldoc.getElementsByTagName("eop:orbitType")[0].firstChild.data
+                    provider=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data.split('-')[0]
+                    instrument=xmldoc.getElementsByTagName("eop:shortName")[0].firstChild.data
+                    satellite_id=xmldoc.getElementsByTagName("eop:serialIdentifier")[0].firstChild.data
+                    number_of_bands=xmldoc.getElementsByTagName("re:numBands")[0].firstChild.data
+                    epsg_code=xmldoc.getElementsByTagName("re:epsgCode")[0].firstChild.data
+                    resampling_kernel=xmldoc.getElementsByTagName("re:resamplingKernel")[0].firstChild.data
+                    number_rows=xmldoc.getElementsByTagName("re:numRows")[0].firstChild.data
+                    number_columns=xmldoc.getElementsByTagName("re:numColumns")[0].firstChild.data
+                    gsd=xmldoc.getElementsByTagName("re:rowGsd")[0].firstChild.data
                     cloud=xmldoc.getElementsByTagName("opt:cloudCoverPercentage")[0].firstChild.data
-                    date_time = acquisition.split("T")[0]
-                    pattern = '%Y-%m-%d'
-                    epoch = int(time.mktime(time.strptime(date_time, pattern)))*1000
                     psia=xmldoc.getElementsByTagName("eop:incidenceAngle")[0].firstChild.data
                     psilaz=xmldoc.getElementsByTagName("opt:illuminationAzimuthAngle")[0].firstChild.data
                     psilelv=xmldoc.getElementsByTagName("opt:illuminationElevationAngle")[0].firstChild.data
                     psaz=xmldoc.getElementsByTagName("re:azimuthAngle")[0].firstChild.data
                     pssca=xmldoc.getElementsByTagName("re:spaceCraftViewAngle")[0].firstChild.data
                     psrad=xmldoc.getElementsByTagName("re:radiometricScaleFactor")[0].firstChild.data
-                    print("ID_Name:", eopfilename.split(".")[0])
-                    print("Acquisition Date:", acquisition.split("T")[0])
-                    print("Satellite Type:", str(platform))
-                    print("Satellite ID:", str(sid))
-                    print("Tile ID:", tile)
-                    print("Number of Bands:", bands)
-                    print("Cloud Cover:", format(float(cloud),'.2f'))
-                    print("Epoch Time:",epoch)
-                    print("RE Incidence Angle",format(float(psia),'.4f'))
-                    print("RE illumination azimuth angle",format(float(psilaz),'.2f'))
-                    print("RE illumination elevation angle",format(float(psilelv),'.2f'))
-                    print("RE Azimuth angle",format(float(psaz),'.2f'))
-                    print("RE SpaceCraft angle",format(float(pssca),'.4f'))
-                    print("Radiometric Scale Factor", format(float(psrad),'.18f'))
+                    date_time = acquisition.split("T")[0]
+                    pattern = '%Y-%m-%d'
+                    epoch = int(time.mktime(time.strptime(date_time, pattern)))*1000
+                    print("Processing "+str(i)+" of "+str(file_count))
+                    i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([fsp,epoch,str(platform),str(sid),tile,bands,format(float(cloud),'.2f'),format(float(psia),'.4f'),format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f'),format(float(psrad),'.18f')])
+                        writer.writerow([id_no,epoch,str(productType),str(tile_id),str(order_id),
+                                         str(orbit),str(provider),str(instrument),str(satellite_id),
+                                         number_of_bands,epsg_code,resampling_kernel,number_rows,number_columns,
+                                         format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
+                                         format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),
+                                         format(float(pssca),'.4f'),format(float(psrad),'.18f')])
                     csvfile.close()
                 except Exception as e:
                     print(infilename)

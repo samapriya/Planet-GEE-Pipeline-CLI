@@ -1,0 +1,2 @@
+filename,task_id,error_msg
+20170908_175226_1039_3B_AnalyticMS,0,'module' object has no attribute 'data'

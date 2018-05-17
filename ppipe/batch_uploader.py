@@ -7,6 +7,9 @@ import os
 import sys
 import time
 import subprocess
+import json
+import manifest_lib
+import pandas as pd
 if sys.version_info > (3, 0):
     from urllib.parse import unquote
 else:
@@ -15,14 +18,14 @@ else:
 import ee
 import requests
 import retrying
-from requests_toolbelt.multipart import encoder
+from requests_toolbelt import MultipartEncoder
 from bs4 import BeautifulSoup
 
 from google.cloud import storage
 
 from metadata_loader import load_metadata_from_csv, validate_metadata_from_csv
-
-
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
+lp=os.path.dirname(os.path.realpath(__file__))
 def upload(user, source_path, destination_path, manifest=None,metadata_path=None, multipart_upload=False, nodata_value=None, bucket_name=None):
 
     """
@@ -82,6 +85,29 @@ def upload(user, source_path, destination_path, manifest=None,metadata_path=None
             continue
 
         properties = metadata[filename] if metadata else None
+        if manifest=="PSO":
+            data=manifest_lib.data_pso
+        elif manifest=="PSO_DN":
+            data=manifest_lib.data_psodn
+        elif manifest=="PSO_V":
+            data=manifest_lib.data_psov
+        elif manifest=="PS4B":
+            data=manifest_lib.data_ps4b
+        elif manifest=="PS4B_DN":
+            data=manifest_lib.data_ps4bdn
+        elif manifest=="PS3B":
+            data=manifest_lib.data_ps3b
+        elif manifest=="PS3B_DN":
+            data=manifest_lib.data_ps3bdn
+        elif manifest=="PS3B_V":
+            data=manifest_lib.data_ps3bv
+        elif manifest=="REO":
+            data=manifest_lib.data_reo
+        elif manifest=="REO_V":
+            data=manifest_lib.data_reov
+        else:
+            print("No Manifest Provided")
+            sys.exit()
         try:
             if user is not None:
                 gsid = __upload_file_gee(session=google_session,
@@ -92,53 +118,36 @@ def upload(user, source_path, destination_path, manifest=None,metadata_path=None
 
             asset_request = __create_asset_request(asset_full_path, gsid, properties, nodata_value)
 
-            if manifest=="PSO":
-                with open(metadata_path,'r') as myfile:
-                    head=myfile.readlines()[0:1]
-                    delim=str(head).split(',')
-                    headlist=list(delim)
-                with open(metadata_path, 'r') as f:
-                    reader = csv.DictReader(f,delimiter=",")
-                    for i, line in enumerate(reader):
-                        absolute= ("earthengine upload image "+"--asset_id="+destination_path+'/'+filename+' '
-                        +' -p '+'"'+"(string)"+"id_no"+'='+filename+'"'+' -p '+'"'+"(number)"+headlist[1]+'='+line['system:time_start']+'"'
-                        +' -p '+'"'+"(string)"+headlist[2]+'='+line['platform']+'"'+' -p '+'"'+"(string)"+headlist[3]+'='+line['satType']+'"'
-                        +' -p '+'"'+"(string)"+headlist[4]+'='+line['satID']+'"'+' -p '+'"'+"(number)"+headlist[5]+'='+line['tileID']+'"'
-                        +' -p '+'"'+"(number)"+headlist[6]+'='+line['numBands']+'"'+' -p '+'"'+"(number)"+headlist[7]+'='+line['cloudcover']+'"'
-                        +' -p '+'"'+"(number)"+headlist[8]+'='+line['incAngle']+'"'+' -p '+'"'+"(number)"+headlist[9]+'='+line['illAzAngle']+'"'
-                        +' -p '+'"'+"(number)"+headlist[10]+'='+line['illElvAngle']+'"'+' -p '+'"'+"(number)"+headlist[11]+'='+line['azAngle']+'"'
-                        +' -p '+'"'+"(number)"+headlist[12]+'='+line['spcAngle']+'"'+' -p '+'"'+"(number)"+headlist[13]+'='+line['rsf']+'"'
-                        +' -p '+'"'+"(number)"+headlist[14]+'='+line['refCoeffB1']+'"'+' -p '+'"'+"(number)"+headlist[15]+'='+line['refCoeffB2']+'"'
-                        +' -p '+'"'+"(number)"+headlist[16]+'='+line['refCoeffB3']+'"'+' -p '+'"'+"(number)"+"refCoeffB4"+'='+line['refCoeffB4']+'"'+' --nodata_value=0')
-                    b=absolute+' '+gsid
-                    print(subprocess.check_output(b))##Executes the command line function to start ingestion process
-            elif manifest=="PS4B_SR":
-                with open(metadata_path,'r') as myfile:
-                    head=myfile.readlines()[0:1]
-                    delim=str(head).split(',')
-                    headlist=list(delim)
-                with open(metadata_path, 'r') as f:
-                    reader = csv.DictReader(f,delimiter=",")
-                    for i, line in enumerate(reader):
-                        absolute= ("earthengine upload image "+"--asset_id="+destination_path+'/'+filename+' '
-                        +' -p '+'"'+"(string)"+"id_no"+'='+filename+'"'+' -p '+'"'+"(string)"+headlist[1]+'='+line['platform']+'"'
-                        +' -p '+'"'+"(string)"+headlist[2]+'='+line['satType']+'"'+' -p '+'"'+"(string)"+headlist[3]+'='+line['satID']+'"'
-                        +' -p '+'"'+"(number)"+headlist[4]+'='+line['numBands']+'"'+' -p '+'"'+"(number)"+headlist[5]+'='+line['cloudcover']+'"'
-                        +' -p '+'"'+"(number)"+headlist[6]+'='+line['system:time_start']+'"'+' -p '+'"'+"(string)"+headlist[7]+'='+line['AtmModel']+'"'
-                        +' -p '+'"'+"(string)"+headlist[8]+'='+line['Aerosol_Model']+'"'+' -p '+'"'+"(string)"+headlist[9]+'='+line['AOT_Method']+'"'
-                        +' -p '+'"'+"(number)"+headlist[10]+'='+line['AOT_Std']+'"'+' -p '+'"'+"(number)"+headlist[11]+'='+line['AOT_Used']+'"'
-                        +' -p '+'"'+"(string)"+headlist[12]+'='+line['AOT_Status']+'"'+' -p '+'"'+"(number)"+headlist[13]+'='+line['AOT_MeanQual']+'"'
-                        +' -p '+'"'+"(number)"+headlist[14]+'='+line['LUTS_Version']+'"'+' -p '+'"'+"(number)"+headlist[15]+'='+line['SolarZenAngle']+'"'
-                        +' -p '+'"'+"(number)"+headlist[16]+'='+line['AOT_Coverage']+'"'+' -p '+'"'+"(string)"+headlist[17]+'='+line['AOT_Source']+'"'
-                        +' -p '+'"'+"(string)"+headlist[18]+'='+line['AtmCorr_Alg']+'"'+' -p '+'"'+"(number)"+headlist[19]+'='+line['incAngle']+'"'
-                        +' -p '+'"'+"(number)"+headlist[20]+'='+line['illAzAngle']+'"'+' -p '+'"'+"(number)"+headlist[21]+'='+line['illElvAngle']+'"'
-                        +' -p '+'"'+"(number)"+headlist[22]+'='+line['azAngle']+'"'+' -p '+'"'+"(number)"+'spcAngle'+'='+line['spcAngle']+'"'+' --nodata_value=0')
-                    b=absolute+' '+gsid
-                    print(subprocess.check_output(b))##Executes the command line function to start ingestion process
-            else:
-                task_id = __start_ingestion_task(asset_request)
-                submitted_tasks_id[task_id] = filename
-                __periodic_check(current_image=current_image_no, period=20, tasks=submitted_tasks_id, writer=failed_asset_writer)
+            df=pd.read_csv(metadata_path)
+            stringcol = list(df.select_dtypes(include=['object']).columns)
+            intcol= list(df.select_dtypes(include=['int64']).columns)
+            floatcol = list(df.select_dtypes(include=['float64']).columns)
+            with open(metadata_path, 'r') as f:
+                reader = csv.DictReader(f,delimiter=",")
+                for i, line in enumerate(reader):
+                    if line["id_no"]==os.path.basename(image_path).split('.')[0]:
+                        for key, value in data['properties'].items():
+                            for integer in intcol:
+                                try:
+                                    data['properties'][integer]=int(line[integer])
+                                except Exception as e:
+                                    print(e)
+                            for s in stringcol:
+                                try:
+                                    data['properties'][s]=str(line[s])
+                                except Exception as e:
+                                    print(e)
+                            for f in floatcol:
+                                try:
+                                    data['properties'][f]=float(line[f])
+                                except Exception as e:
+                                    print(e)
+                        data['id']=destination_path+'/'+line["id_no"]
+                        data['tilesets'][0]['sources'][0]['primaryPath']=gsid
+                        json_data = json.dumps(data)
+                        with open(os.path.join(lp,'data.json'), 'w') as outfile:
+                            json.dump(data, outfile)
+                        subprocess.call("earthengine upload_manifest "+'"'+os.path.join(lp,'data.json')+'"')
         except Exception as e:
             logging.exception('Upload of %s has failed.', filename)
             failed_asset_writer.writerow([filename, 0, str(e)])
@@ -270,7 +279,7 @@ def __upload_file_gee(session, file_path, use_multipart):
 
 
         if use_multipart:
-            form = encoder.MultipartEncoder({
+            form = MultipartEncoder({
                 "documents": (file_path, f, "application/octet-stream"),
                 "composite": "NONE",
             })
