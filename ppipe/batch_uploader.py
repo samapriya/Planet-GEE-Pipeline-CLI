@@ -93,6 +93,8 @@ def upload(user, source_path, destination_path, manifest=None,metadata_path=None
             data=manifest_lib.data_psov
         elif manifest=="PS4B":
             data=manifest_lib.data_ps4b
+        elif manifest=="PS4B_SR":
+            data=manifest_lib.data_ps4bsr
         elif manifest=="PS4B_DN":
             data=manifest_lib.data_ps4bdn
         elif manifest=="PS3B":

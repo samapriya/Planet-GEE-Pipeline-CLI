@@ -68,7 +68,7 @@ def downloadpl_from_parser(args):
         planet_pathway=str(args.pathway)
         asset_type=str(args.asst)
         try:
-            os.system("python download.py --query "+args.aoi+" --download"+" "+args.pathway+" "+asset_type)
+            subprocess.call("python download.py --query "+'"'+args.aoi+'" '+" --download "+'"'+args.pathway+'"'+" "+args.asst,shell=True)
         except Exception:
             print(' ')
 

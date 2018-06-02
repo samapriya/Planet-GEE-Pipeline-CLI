@@ -17,10 +17,6 @@ SESSION.auth = (PL_API_KEY, '')
 
 
 def handle_page(page,asset,num):
-    with open(os.path.join(pathway,"idpl.csv"),'wb') as csvfile:
-        writer=csv.DictWriter(csvfile,fieldnames=["id"], delimiter=',')
-        writer.writeheader()
-    open(os.path.join(pathway,"idpl.txt"), 'w')
     if num<250:
         n=0
         for items in page['features']:
@@ -59,6 +55,10 @@ def handle_page(page,asset,num):
                 the_file.write(row)
 
 def idl(infile,item,asset,num):
+    with open(os.path.join(pathway,"idpl.csv"),'wb') as csvfile:
+        writer=csv.DictWriter(csvfile,fieldnames=["id"], delimiter=',')
+        writer.writeheader()
+    open(os.path.join(pathway,"idpl.txt"), 'w')
     headers = {'Content-Type': 'application/json'}
     PL_API_KEY = read_planet_json()['key']
 ## Create Empty CSV File for ID List
