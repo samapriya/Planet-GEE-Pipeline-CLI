@@ -12,6 +12,8 @@ import psutil
 import csv
 from retrying import retry
 from os.path import expanduser
+from planet.api.utils import read_planet_json
+from planet.api.auth import find_api_key
 #from urllib3 import PoolManager
 from requests.packages.urllib3.poolmanager import PoolManager
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -21,11 +23,12 @@ urllib3.disable_warnings()
 
 ASSET_URL = 'https://api.planet.com/data/v1/item-types/{}/items/{}/assets/'
 SEARCH_URL = 'https://api.planet.com/data/v1/quick-search'
-pkey=expanduser("~/.config/planet/pkey.csv")
-f=open(pkey)
-for row in csv.reader(f):
-    #print(str(row).strip("[']"))
-    os.environ['PLANET_API_KEY']=str(row).strip("[']")
+try:
+    PL_API_KEY = find_api_key()
+    os.environ['PLANET_API_KEY']=find_api_key()
+except:
+    print('Failed to get Planet Key')
+    sys.exit()
 
 # set up auth
 SESSION = requests.Session()

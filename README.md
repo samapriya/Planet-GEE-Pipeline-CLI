@@ -509,6 +509,21 @@ Original upload function adapted from [Lukasz's asset manager tool](https://gith
 
 # Changelog
 
+### v0.3.0
+
+- Allows for quiet authentication for use in Google Colab or non interactive environments
+- Improved planet key entry and authentication protocols
+
+### v0.2.91
+
+- Fixed issue with Surface Reflectance metadata and manifest lib
+- Improved ingestion support for (PSScene4Band analytic_Sr)[PS4B_SR]
+
+### v0.2.9
+
+- Fixed issues with generating id list
+- Improved overall security of command calls
+
 ### v0.2.2
 
 - Major improvements to ingestion using manifest ingest in Google Earth Engine

@@ -19,20 +19,17 @@ from cli_metadata import metadata
 from hurry import filesize
 from idlst import idl
 from os.path import expanduser
+from planet.api.utils import write_planet_json
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 lpath=os.path.dirname(os.path.realpath(__file__))
-def planet_key_entry():
-    planethome=expanduser("~/.config/planet/")
-    if not os.path.exists(planethome):
-        os.mkdir(planethome)
-    print("Enter your Planet API Key")
-    password=getpass.getpass()
-    os.chdir(planethome)
-    with open("pkey.csv",'w') as completed:
-        writer=csv.writer(completed,delimiter=',',lineterminator='\n')
-        writer.writerow([password])
-def planet_key_from_parser(args):
-    planet_key_entry()
+def planet_key_entry(args):
+    if args.type=="quiet":
+        write_planet_json({'key': args.key})
+    elif args.type==None and args.key==None:
+        try:
+            subprocess.call('planet init',shell=True)
+        except Exception as e:
+            print('Failed to Initialize')
 
 def aoijson_from_parser(args):
     aoijson(start=args.start,end=args.end,cloud=args.cloud,inputfile=args.inputfile,geo=args.geo,loc=args.loc)
@@ -168,7 +165,10 @@ def main(args=None):
     parser_pp2 = subparsers.add_parser(' ', help='---------------------------------------')
 
     parser_planet_key = subparsers.add_parser('planetkey', help='Enter your planet API Key')
-    parser_planet_key.set_defaults(func=planet_key_from_parser)
+    optional_named = parser_planet_key.add_argument_group('Optional named arguments')
+    optional_named.add_argument('--type', help='For direct key entry type --type quiet')
+    optional_named.add_argument('--key', help='Your Planet API Key')
+    parser_planet_key.set_defaults(func=planet_key_entry)
 
     parser_aoijson=subparsers.add_parser('aoijson',help='Tool to convert KML, Shapefile,WKT,GeoJSON or Landsat WRS PathRow file to AreaOfInterest.JSON file with structured query for use with Planet API 1.0')
     parser_aoijson.add_argument('--start', help='Start date in YYYY-MM-DD?')

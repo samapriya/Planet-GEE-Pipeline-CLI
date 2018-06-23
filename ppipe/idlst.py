@@ -7,11 +7,15 @@ import os
 import csv
 import sys
 from planet.api.utils import read_planet_json
-
+from planet.api.auth import find_api_key
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 pathway=os.path.dirname(os.path.realpath(__file__))
 
-PL_API_KEY = read_planet_json()['key']
+try:
+    PL_API_KEY = find_api_key()
+except:
+    print('Failed to get Planet Key')
+    sys.exit()
 SESSION = requests.Session()
 SESSION.auth = (PL_API_KEY, '')
 
