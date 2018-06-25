@@ -61,8 +61,8 @@ def downloadpl_from_parser(args):
         subprocess.call("python download.py --idlist "+'"'+"idpl.txt"+'" '+"--download "+args.local+" "+args.asset,shell=True)
     else:
         aoi_json=str(args.aoi)
-        planet_pathway=str(args.pathway)
-        asset_type=str(args.asst)
+        planet_pathway=str(args.local)
+        asset_type=str(args.asset)
         try:
             subprocess.call("python download.py --query "+'"'+args.aoi+'" '+" --download "+'"'+args.local+'"'+" "+args.asset,shell=True)
         except Exception:
