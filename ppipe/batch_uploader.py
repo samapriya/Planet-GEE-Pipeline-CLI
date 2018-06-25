@@ -149,7 +149,7 @@ def upload(user, source_path, destination_path, manifest=None,metadata_path=None
                         json_data = json.dumps(data)
                         with open(os.path.join(lp,'data.json'), 'w') as outfile:
                             json.dump(data, outfile)
-                        subprocess.call("earthengine upload_manifest "+'"'+os.path.join(lp,'data.json')+'"')
+                        subprocess.call("earthengine upload_manifest "+'"'+os.path.join(lp,'data.json')+'"',shell=True)
         except Exception as e:
             logging.exception('Upload of %s has failed.', filename)
             failed_asset_writer.writerow([filename, 0, str(e)])

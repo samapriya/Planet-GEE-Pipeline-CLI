@@ -39,12 +39,11 @@ def idl_from_parser(args):
 
 def activatepl_from_parser(args):
     if args.aoi==None:
-        asset_type=str(args.asst)
+        asset_type=str(args.asset)
         subprocess.call("python download.py --idlist "+'"'+"idpl.txt"+'" '+"--activate "+asset_type,shell=True)
     else:
         aoi_json=str(args.aoi)
-        action_planet=str(args.action)
-        asset_type=str(args.asst)
+        asset_type=str(args.asset)
         subprocess.call("python download.py --query "+'"'+aoi_json+'" '+"--activate "+asset_type,shell=True)
 
 def space_from_parser(args):
@@ -53,19 +52,19 @@ def space_from_parser(args):
     asset=str(args.asset)
     inlet='"'+local+'"'+" "+asset
     try:
-        os.system('python download.py --query '+aoi+' --size '+inlet)
+        subprocess.call("python download.py --query "+'"'+aoi+"'"+" --size "+'"'+inlet+'"',shell=True)
     except Exception:
         print(' ')
 
 def downloadpl_from_parser(args):
     if args.aoi==None:
-        subprocess.call("python download.py --idlist "+'"'+"idpl.txt"+'" '+"--download "+args.pathway+" "+args.asst,shell=True)
+        subprocess.call("python download.py --idlist "+'"'+"idpl.txt"+'" '+"--download "+args.local+" "+args.asset,shell=True)
     else:
         aoi_json=str(args.aoi)
         planet_pathway=str(args.pathway)
         asset_type=str(args.asst)
         try:
-            subprocess.call("python download.py --query "+'"'+args.aoi+'" '+" --download "+'"'+args.pathway+'"'+" "+args.asst,shell=True)
+            subprocess.call("python download.py --query "+'"'+args.aoi+'" '+" --download "+'"'+args.local+'"'+" "+args.asset,shell=True)
         except Exception:
             print(' ')
 
@@ -187,7 +186,7 @@ def main(args=None):
     parser_idl.set_defaults(func=idl_from_parser)
 
     parser_activatepl=subparsers.add_parser('activatepl',help='Tool to activate Planet Assets')
-    parser_activatepl.add_argument('--asst',help='Choose between planet asset types (PSOrthoTile analytic/PSOrthoTile analytic_dn/PSOrthoTile visual/PSScene4Band analytic/PSScene4Band analytic_dn/PSScene3Band analytic/PSScene3Band analytic_dn/PSScene3Band visual/REOrthoTile analytic/REOrthoTile visual')
+    parser_activatepl.add_argument('--asset',help='Choose between planet asset types (PSOrthoTile analytic/PSOrthoTile analytic_dn/PSOrthoTile visual/PSScene4Band analytic/PSScene4Band analytic_dn/PSScene3Band analytic/PSScene3Band analytic_dn/PSScene3Band visual/REOrthoTile analytic/REOrthoTile visual')
     optional_named = parser_activatepl.add_argument_group('Optional named arguments')
     optional_named.add_argument('--aoi', help='Choose aoi.json file created earlier')
     parser_activatepl.set_defaults(func=activatepl_from_parser)
@@ -199,8 +198,8 @@ def main(args=None):
     parser_space.set_defaults(func=space_from_parser)
 
     parser_downloadpl=subparsers.add_parser('downloadpl',help='Tool to download Planet Assets')
-    parser_downloadpl.add_argument('--asst',help='Choose between planet asset types or for Metadata follow by _xml Eg: PSOrthoTile analytic_xml--->Assets Include:(PSOrthoTile analytic/PSOrthoTile analytic_dn/PSOrthoTile visual/PSScene4Band analytic/PSScene4Band analytic_dn/PSScene3Band analytic/PSScene3Band analytic_dn/PSScene3Band visual/REOrthoTile analytic/REOrthoTile visual')
-    parser_downloadpl.add_argument('--pathway',help='Folder Pathways where PlanetAssets are saved exampled ./PlanetScope ./RapidEye')
+    parser_downloadpl.add_argument('--asset',help='Choose between planet asset types or for Metadata follow by _xml Eg: PSOrthoTile analytic_xml--->Assets Include:(PSOrthoTile analytic/PSOrthoTile analytic_dn/PSOrthoTile visual/PSScene4Band analytic/PSScene4Band analytic_dn/PSScene3Band analytic/PSScene3Band analytic_dn/PSScene3Band visual/REOrthoTile analytic/REOrthoTile visual')
+    parser_downloadpl.add_argument('--local',help='Local Pathways where PlanetAssets are saved exampled ./PlanetScope ./RapidEye')
     optional_named = parser_downloadpl.add_argument_group('Optional named arguments')
     optional_named.add_argument('--aoi', help='Choose aoi.json file created earlier')
     parser_downloadpl.set_defaults(func=downloadpl_from_parser)
