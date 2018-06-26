@@ -52,7 +52,7 @@ def space_from_parser(args):
     asset=str(args.asset)
     inlet='"'+local+'"'+" "+asset
     try:
-        subprocess.call("python download.py --query "+'"'+aoi+"'"+" --size "+'"'+inlet+'"',shell=True)
+        subprocess.call("python download.py --query "+'"'+aoi+'"'+" --size "+'"'+inlet+'"',shell=True)
     except Exception:
         print(' ')
 
