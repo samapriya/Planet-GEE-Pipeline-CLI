@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import argparse,logging,os,ee,subprocess,getpass,csv,re,time,clipboard
+from hurry import filesize
 from collections import Counter
 from ee import oauth
 from batch_copy import copy
@@ -50,9 +51,8 @@ def space_from_parser(args):
     aoi=args.aoi
     local=str(args.local)
     asset=str(args.asset)
-    inlet='"'+local+'"'+" "+asset
     try:
-        subprocess.call("python download.py --query "+'"'+aoi+'"'+" --size "+'"'+inlet+'"',shell=True)
+        subprocess.call("python download.py --query "+'"'+aoi+'"'+" --size "+'"'+local+'" '+asset.split(" ")[0]+" "+asset.split(" ")[1],shell=True)
     except Exception:
         print(' ')
 

@@ -10,6 +10,7 @@ import datetime
 import urllib3
 import psutil
 import csv
+from hurry import filesize
 from retrying import retry
 from os.path import expanduser
 from planet.api.utils import read_planet_json
@@ -342,7 +343,7 @@ def process_size(path, id_list, item_type, asset_type, overwrite):
                 content_bytes = response.headers.get("Content-Length")
                 print("Item-ID: "+str(item_id))
                 #print(int(content_bytes)/1048576,"MB")
-                summary=float(content_bytes)/1073741824
+                summary=float(content_bytes)
                 summation=summation+summary
                 #print ("Total Size in MB",summation)
             else:
@@ -354,10 +355,8 @@ def process_size(path, id_list, item_type, asset_type, overwrite):
 
         results.append(result)
     #print(remain,"MB")
-    print("Remaining Space in MB",format(float(remain*1024),'.2f'))
-    print("Remaining Space in GB",format(float(remain),'.2f'))
-    print ("Total Size in MB",format(float(summation*1024),'.2f'))
-    print ("Total Size in GB",format(float(summation),'.2f'))
+    print('')
+    print ("Total Download Size "+str(filesize.size(summation)))
     return results
 
 

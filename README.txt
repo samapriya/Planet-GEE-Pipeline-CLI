@@ -17,6 +17,11 @@ Credits
 Changelog
 =========
 
+v0.3.5
+```````
+* Fixed issues with space function
+* Improved file size parsing
+
 v0.3.2
 ```````
 * Generalized CLI arguments
