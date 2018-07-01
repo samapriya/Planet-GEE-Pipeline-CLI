@@ -5,15 +5,13 @@
 [![Planet](https://img.shields.io/badge/SupportedBy%3A-Planet%20Ambassador%20Program-brightgreen.svg)](https://www.planet.com/products/education-and-research/)
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/samapriya)
 
-While moving between assets from Planet Inc and Google Earth Engine it was imperative to create a pipeline that allows for easy transitions between the two service end points and this tool is designed to act as a step by step process chain from Planet Assets to batch upload and modification within the Google Earth Engine environment. The ambition is apart from helping user with batch actions on assets along with interacting and extending capabilities of existing GEE CLI. It is developed case by case basis to include more features in the future as it becomes available or as need arises. tab.
+This tool is designed to facilitate moving data from Planet's API into Google Earth Engine and using a metadata library. The tool dowloads data into a local storage and allows you to process the metadata before uploading into Google Earth Engine. This tool has been updated to account for metadata property type by going through each metadata column and then uses the **upload manifest** function to upload images for ingestion to EE. This tool also draws from an additional tool I created with is the [Google Earth Engine Assest Manager Addon](https://github.com/samapriya/gee_asset_manager_addon) This includes the batch upload feature, but now additional tools such as generating reports of Earth Engine assets and quering quota to name just a few. The ambition is apart from helping users with batch actions on assets along with interacting and extending capabilities of existing GEE CLI. It is developed case by case basis to include more features in the future as it becomes available or as need arises. I have now relesed this as a [PyPI package](https://pypi.org/project/ppipe/) for easy installation and this will be updated along with the github package. 
 
-![CLI](https://i.imgur.com/1H4IlW9.gif)
+![CLI](https://i.imgur.com/qTBnQOk.gif)
 
 ## Table of contents
 * [Installation](#installation)
 * [Getting started](#getting-started)
-    * [Batch uploader](#batch-uploader)
-    * [Parsing metadata](#parsing-metadata)
 * [Usage examples](#usage-examples)
 * [Planet Tools](#planet-tools)
 	* [Planet Key](#planet-key)
@@ -41,11 +39,11 @@ While moving between assets from Planet Inc and Google Earth Engine it was imper
 * [Credits](#credits)
 
 ## Installation
-We assume Earth Engine Python API is installed and EE authorised as desribed [here](https://developers.google.com/earth-engine/python_install). We also assume Planet Python API is installed you can install by simply running.
-```
-pip install planet
-```
-Further instructions can be found [here](https://www.planet.com/docs/api-quickstart-examples/cli/)
+This assumes that you have native python & pip installed in your system, you can test this by going to the terminal (or windows command prompt) and trying
+
+```python``` and then ```pip list```
+
+If you get no errors and you have python 2.7.14 or higher you should be good to go. Please note that I have released this as a python 2.7 but can be easily modified for python 3.
 
 **This toolbox also uses some functionality from GDAL**
 For installing GDAL in Ubuntu
@@ -56,37 +54,38 @@ sudo apt-get install gdal-bin
 For Windows I found this [guide](https://sandbox.idre.ucla.edu/sandbox/tutorials/installing-gdal-for-windows) from UCLA
 
 To install **Planet-GEE-Pipeline-CLI:**
+You can install using two methods
+
+```pip install ppipe```
+
+or you can also try 
+
 ```
 git clone https://github.com/samapriya/Planet-GEE-Pipeline-CLI.git
-cd Planet-GEE-Pipeline-CLI && pip install -r requirements.txt
-
-for linux use sudo pip install -r requirements.txt
+cd Planet-GEE-Pipeline-CLI
+python setup.py install
 ```
-This release also contains a windows installer which bypasses the need for you to have admin permission, it does however require you to have python in the system path meaning when you open up command prompt you should be able to type python and start it within the command prompt window. Post installation using the installer you can just call ppipe using the command prompt similar to calling python. Give it a go post installation type
+For linux use sudo. This release also contains a windows installer which bypasses the need for you to have admin permission, it does however require you to have python in the system path meaning when you open up command prompt you should be able to type python and start it within the command prompt window. Post installation using the installer you can just call ppipe using the command prompt similar to calling python. Give it a go post installation type
+
 ```
 ppipe -h
 ```
-Installation is an optional step; the application can be also run directly by executing ppipe.py script. The advantage of having it installed is being able to execute ppipe as any command line tool. I recommend installation within virtual environment. To install run
-```
-python setup.py develop or python setup.py install
 
-In a linux distribution
-sudo python setup.py develop or sudo python setup.py install
-```
+Installation is an optional step; the application can be also run directly by executing ppipe.py script. The advantage of having it installed is being able to execute ppipe as any command line tool. I recommend installation within virtual environment. If you don't want to install, browse into the ppipe folder and try ```python ppipe.py``` to get the same result.
 
 ## Getting started
 
 As usual, to print help:
 ```
-usage: ppipe.py [-h]
-                {
-                ,planetkey,aoijson,activatepl,space,downloadpl,metadata,ee_user,create,upload,lst,collsize,delete,tasks,taskquery,report,cancel,mover,copy,access,collprop,cleanout}
-                ...
+usage: ppipe [-h]
+             {
+             ,planetkey,aoijson,idlist,activatepl,space,downloadpl,metadata,ee_user,quota,create,upload,lst,ee_report,assetsize,tasks,taskreport,delete,mover,copy,access,collprop,cancel}
+             ...
 
 Planet Pipeline with Google Earth Engine Batch Addons
 
 positional arguments:
-  { ,planetkey,aoijson,activatepl,space,downloadpl,metadata,ee_user,create,upload,lst,collsize,delete,tasks,taskquery,report,cancel,mover,copy,access,collprop,cleanout}
+  { ,planetkey,aoijson,idlist,activatepl,space,downloadpl,metadata,ee_user,quota,create,upload,lst,ee_report,assetsize,tasks,taskreport,delete,mover,copy,access,collprop,cancel}
                         ---------------------------------------
                         -----Choose from Planet Tools Below-----
                         ---------------------------------------
@@ -94,7 +93,8 @@ positional arguments:
     aoijson             Tool to convert KML, Shapefile,WKT,GeoJSON or Landsat
                         WRS PathRow file to AreaOfInterest.JSON file with
                         structured query for use with Planet API 1.0
-    activatepl          Tool to query and/or activate Planet Assets
+    idlist              Creates an IDLIST that intersects AOI JSON
+    activatepl          Tool to activate Planet Assets
     space               Tool to query total download size of activated assets
                         & local space left for download
     downloadpl          Tool to download Planet Assets
@@ -105,20 +105,22 @@ positional arguments:
                         -------------------------------------------
     ee_user             Get Earth Engine API Key & Paste it back to Command
                         line/shell to change user
+    quota               Print Earth Engine total quota and used quota
     create              Allows the user to create an asset collection or
                         folder in Google Earth Engine
     upload              Batch Asset Uploader.
     lst                 List assets in a folder/collection or write as text
                         file
-    collsize            Collects collection size in Human Readable form &
-                        Number of assets
+    ee_report           Prints a detailed report of all Earth Engine Assets
+                        includes Asset Type, Path,Number of
+                        Assets,size(MB),unit,owner,readers,writers
+    assetsize           Prints collection size in Human Readable form & Number
+                        of assets
+    tasks               Queries current task status
+                        [completed,running,ready,failed,cancelled]
+    taskreport          Create a report of all tasks and exports to a CSV file
     delete              Deletes collection and all items inside. Supports
                         Unix-like wildcards.
-    tasks               Queries currently running, enqued,failed
-    taskquery           Queries currently running, enqued,failed ingestions
-                        and uploaded assets
-    report              Create a report of all tasks and exports to a CSV file
-    cancel              Cancel all running tasks
     mover               Moves all assets from one collection to another
     copy                Copies all assets from one collection to another:
                         Including copying from other users if you have read
@@ -128,31 +130,23 @@ positional arguments:
                         "folder" --asset "users/john/doe" --user
                         "jimmy@doe.com:R"
     collprop            Sets Overall Properties for Image Collection
-    cleanout            Clear folders with datasets from earlier downloaded
+    cancel              Cancel all running tasks
 
 optional arguments:
   -h, --help            show this help message and exit
 ```
 
-To obtain help for a specific functionality, simply call it with _help_
-switch, e.g.: `ppipe upload -h`. If you didn't install ppipe, then you
-can run it just by going to _ppipe_ directory and running `python
-ppipe.py [arguments go here]`
+To obtain help for a specific functionality, simply call it with _help_ switch, e.g.: `ppipe upload -h`. If you didn't install ppipe, then you can run it just by going to _ppipe_ directory and running `python ppipe.py [arguments go here]`
 
 ## Batch uploader
-The script creates an Image Collection from GeoTIFFs in your local
-directory. By default, the collection name is the same as the local
-directory name; with optional parameter you can provide a different
-name. Another optional parameter is a path to a CSV file with metadata
-for images, which is covered in the next section:
+The script creates an Image Collection from GeoTIFFs in your local directory. By default, the collection name is the same as the local
+directory name; with optional parameter you can provide a different name. You have to process the metadata for images, which is covered in the next section along with a manifest type for Planet image and asset:
 [Parsing metadata](#parsing-metadata).
 
-
-
 ```
-usage: ppipe.py upload [-h] --source SOURCE --dest DEST [-m METADATA]
-                       [-mf MANIFEST] [--large] [--nodata NODATA] [-u USER]
-                       [-s SERVICE_ACCOUNT] [-k PRIVATE_KEY] [-b BUCKET]
+usage: ppipe upload [-h] --source SOURCE --dest DEST [-m METADATA]
+                    [-mf MANIFEST] [--large] [--nodata NODATA] [-u USER]
+                    [-s SERVICE_ACCOUNT] [-k PRIVATE_KEY] [-b BUCKET]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -161,14 +155,19 @@ Required named arguments.:
   --source SOURCE       Path to the directory with images for upload.
   --dest DEST           Destination. Full path for upload to Google Earth
                         Engine, e.g. users/pinkiepie/myponycollection
-  -u USER, --user USER  Google account name (gmail address).
-
-Optional named arguments:
   -m METADATA, --metadata METADATA
                         Path to CSV with metadata.
   -mf MANIFEST, --manifest MANIFEST
-                        Manifest type to be used,for planetscope use
-                        "planetscope"
+                        Manifest type to be used,Choose PS OrthoTile(PSO)|PS
+                        OrthoTile DN(PSO_DN)|PS OrthoTile
+                        Visual(PSO_V)|PS4Band Analytic(PS4B)|PS4Band
+                        DN(PS4B_DN)|PS4Band SR(PS4B_SR)|PS3Band
+                        Analytic(PS3B)|PS3Band DN(PS3B_DN)|PS3Band
+                        Visual(PS3B_V)|RE OrthoTile (REO)|RE OrthoTile
+                        Visual(REO_V)
+  -u USER, --user USER  Google account name (gmail address).
+
+Optional named arguments:
   --large               (Advanced) Use multipart upload. Might help if upload
                         of large files is failing on some systems. Might cause
                         other issues.
@@ -180,34 +179,8 @@ Optional named arguments:
                         Google Earth Engine private key file.
   -b BUCKET, --bucket BUCKET
                         Google Cloud Storage bucket name.
-```
-
-### Parsing metadata
-By metadata we understand here the properties associated with each image. Thanks to these, GEE user can easily filter collection based on specified criteria. The file with metadata should be organised as follows:
-
-| filename (without extension) | property1 header | property2 header |
-|------------------------------|------------------|------------------|
-| file1                        | value1           | value2           |
-| file2                        | value3           | value4           |
-
-Note that header can contain only letters, digits and underscores.
-
-Example:
-
-| id_no     | class      | category | binomial             |system:time_start|
-|-----------|------------|----------|----------------------|-----------------|
-| my_file_1 | GASTROPODA | EN       | Aaadonta constricta  |1478943081000    |
-| my_file_2 | GASTROPODA | CR       | Aaadonta irregularis |1478943081000    |
-
-The corresponding files are my_file_1.tif and my_file_2.tif. With each of the files five properties are associated: id_no, class, category, binomial and system:time_start. The latter is time in Unix epoch format, in milliseconds, as documented in GEE glosary. The program will match the file names from the upload directory with ones provided in the CSV and pass the metadata in JSON format:
 
 ```
-{ id_no: my_file_1, class: GASTROPODA, category: EN, binomial: Aaadonta constricta, system:time_start: 1478943081000}
-```
-
-The program will report any illegal fields, it will also complain if not all of the images passed for upload have metadata associated. User can opt to ignore it, in which case some assets will have no properties.
-
-Having metadata helps in organising your asstets, but is not mandatory - you can skip it.
 
 
 ## Usage examples
@@ -244,6 +217,22 @@ optional arguments:
                         Example: 023042)
   --geo GEO             map.geojson/aoi.kml/aoi.shp/aoi.wkt file
   --loc LOC             Location where aoi.json file is to be stored
+```
+
+### IDlist
+It is not possible to call the tool on an idlist instead of using a JSON , this option is useful when you want when you want to use the same item ID with different asset types quickly. For example the item ID for PSScene4Band analytic and PSScene4Band analytic_sr is the same. This is a quicker way to parse different asset type and create an IDlist for activation and download.
+```
+usage: ppipe idlist [-h] [--aoi AOI] [--item ITEM] [--asset ASSET]
+                    [--number NUMBER]
+
+optional arguments:
+  -h, --help       show this help message and exit
+  --aoi AOI        Choose aoi.json file created earlier
+  --item ITEM      choose between Planet Item types
+                   PSOrthoTile|PSScene4Band|PSScene3Band|REOrthoTile
+  --asset ASSET    Choose between Planet asset types
+                   analytic|analytic_dn|visual
+  --number NUMBER  Maximum number of assets for the idlist
 ```
 
 ### Activate or Check Asset
