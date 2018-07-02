@@ -519,6 +519,20 @@ Original upload function adapted from [Lukasz's asset manager tool](https://gith
 
 # Changelog
 
+### v0.3.6
+
+- Now handles complex geometry by using a bounding box for GeoJSON files
+
+### v0.3.5
+
+- Fixed issues with space function
+- Improved file size parsing
+
+### v0.3.2
+
+- Generalized CLI arguments
+- Fixed subprocess shell issue for upload
+
 ### v0.3.0
 
 - Allows for quiet authentication for use in Google Colab or non interactive environments

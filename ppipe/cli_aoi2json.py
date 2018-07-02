@@ -6,9 +6,11 @@ import argparse
 import sys
 import time
 import os
+import ee
 import csv
 import shapefile
 import string
+
 p1='{"config": [{"field_name": "geometry", "config": {"type": "Polygon","coordinates":'
 p2='}, "type": "GeometryFilter"}, {"field_name": "gsd", "config": {"gte":1,"lte":9.99}, "type": "RangeFilter"}, {"field_name": "acquired", "config": {"gte":"'
 p3='T04:00:00.000Z","lte":"'
@@ -24,20 +26,37 @@ def aoijson(start,end,cloud,inputfile,geo,loc):
         print("New structured JSON has been created at "+str(os.path.join(os.path.join(os.path.splitext(loc)[0],os.path.splitext(os.path.basename(geo))[0]+"_aoi.json"))))
         os.remove(os.path.join(loc,'kmlout.geojson'))
     elif inputfile == 'GJSON':
+        ee.Initialize()
         with open(geo) as insert,open(os.path.join(dir_path,"aoi.json")) as jbase:
             geombase=json.load(jbase)
             geomloader = json.load(insert)
             cinsert= geomloader['features'][0]['geometry']['coordinates']
             cgeom=(geombase['config'][0]['config']['coordinates'])
-            geombase['config'][0]['config']['coordinates']=cinsert #coordinate insert
-            geombase['config'][2]['config']['gte']=str(start)+"T04:00:00.000Z" #change start date
-            geombase['config'][2]['config']['lte']=str(end)+"T03:59:59.999Z" #change end date
-            geombase['config'][3]['config']['gte']=0#change cloud minima default=0
-            geombase['config'][3]['config']['lte']=float(cloud)# change cloud maxima
-            print(os.path.join(os.path.splitext(loc)[0],os.path.splitext(os.path.basename(geo))[0]+"_aoi.json"))
-            with open(os.path.join(os.path.join(os.path.splitext(loc)[0],os.path.splitext(os.path.basename(geo))[0]+"_aoi.json")), 'w') as f:
-                f.write(json.dumps(geombase))
-            print("New structured JSON has been created at "+str(os.path.join(os.path.join(os.path.splitext(loc)[0],os.path.splitext(os.path.basename(geo))[0]+"_aoi.json"))))
+            if (len(str(cinsert).split(','))/2) <=10:
+                geombase['config'][0]['config']['coordinates']=cinsert #coordinate insert
+                geombase['config'][2]['config']['gte']=str(start)+"T04:00:00.000Z" #change start date
+                geombase['config'][2]['config']['lte']=str(end)+"T03:59:59.999Z" #change end date
+                geombase['config'][3]['config']['gte']=0#change cloud minima default=0
+                geombase['config'][3]['config']['lte']=float(cloud)# change cloud maxima
+                print(os.path.join(os.path.splitext(loc)[0],os.path.splitext(os.path.basename(geo))[0]+"_aoi.json"))
+                with open(os.path.join(os.path.join(os.path.splitext(loc)[0],os.path.splitext(os.path.basename(geo))[0]+"_aoi.json")), 'w') as f:
+                    f.write(json.dumps(geombase))
+                print("New structured JSON has been created at "+str(os.path.join(os.path.join(os.path.splitext(loc)[0],os.path.splitext(os.path.basename(geo))[0]+"_aoi.json"))))
+            else:
+                print("")
+                print("Complex Geometry Provided: Using a Bounding box instead")
+                print("")
+                cbox=[]
+                cbox.append(ee.Geometry.Polygon(cinsert).bounds().getInfo()['coordinates'][0])
+                geombase['config'][0]['config']['coordinates']=cbox #coordinate insert
+                geombase['config'][2]['config']['gte']=str(start)+"T04:00:00.000Z" #change start date
+                geombase['config'][2]['config']['lte']=str(end)+"T03:59:59.999Z" #change end date
+                geombase['config'][3]['config']['gte']=0#change cloud minima default=0
+                geombase['config'][3]['config']['lte']=float(cloud)# change cloud maxima
+                print(os.path.join(os.path.splitext(loc)[0],os.path.splitext(os.path.basename(geo))[0]+"_aoi.json"))
+                with open(os.path.join(os.path.join(os.path.splitext(loc)[0],os.path.splitext(os.path.basename(geo))[0]+"_aoi.json")), 'w') as f:
+                    f.write(json.dumps(geombase))
+                print("New structured JSON has been created at "+str(os.path.join(os.path.join(os.path.splitext(loc)[0],os.path.splitext(os.path.basename(geo))[0]+"_aoi.json"))))
     elif inputfile == 'SHP':
         reader = shapefile.Reader(geo)
         fields = reader.fields[1:]

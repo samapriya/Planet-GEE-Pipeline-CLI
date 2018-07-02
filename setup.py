@@ -18,7 +18,7 @@ def readme():
         return f.read()
 setuptools.setup(
     name='ppipe',
-    version='0.3.5',
+    version='0.3.6',
     packages=find_packages(),
     package_data={'ppipe': ['logconfig.json','aoi.json','wrs_grid.csv']},
     url='https://github.com/samapriya/Planet-GEE-Pipeline-CLI',
@@ -36,6 +36,8 @@ setuptools.setup(
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Operating System :: OS Independent',
         'Topic :: Scientific/Engineering :: GIS',
     ),

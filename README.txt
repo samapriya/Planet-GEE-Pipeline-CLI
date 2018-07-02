@@ -17,6 +17,10 @@ Credits
 Changelog
 =========
 
+v0.3.6
+```````
+* Now handles complex geometry by using a bounding box for GeoJSON files
+
 v0.3.5
 ```````
 * Fixed issues with space function
