@@ -51,6 +51,7 @@ For installing GDAL in Ubuntu
 ```
 sudo add-apt-repository ppa:ubuntugis/ppa && sudo apt-get update
 sudo apt-get install gdal-bin
+sudo apt-get install python-gdal
 ```
 For Windows I found this [guide](https://sandbox.idre.ucla.edu/sandbox/tutorials/installing-gdal-for-windows) from UCLA
 
