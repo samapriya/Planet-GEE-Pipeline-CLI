@@ -20,7 +20,7 @@ This tool is designed to facilitate moving data from Planet's API into Google Ea
     	* [Activate or Check Asset](#activate-or-check-asset)
     	* [Check Total size of assets](#check-total-size-of-assets)
     	* [Download Asset](#download-asset)
-	* [Download Saved Searches](#download-saved-searches)
+		* [Download Saved Searches](#download-saved-searches)
     	* [Metadata Parser](#metadata-parser)
 * [Earth Engine Tools](#earth-engine-tools)
 	* [EE User](#ee-user)
