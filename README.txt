@@ -17,6 +17,10 @@ Credits
 Changelog
 =========
 
+v0.3.7
+```````
+* Now allows users to download from saved searches in planet explorer
+
 v0.3.6
 ```````
 * Now handles complex geometry by using a bounding box for GeoJSON files

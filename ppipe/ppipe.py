@@ -68,6 +68,12 @@ def downloadpl_from_parser(args):
         except Exception:
             print(' ')
 
+def savedsearch_from_parser(args):
+    if args.limit==None:
+        subprocess.call("python saved_search_download.py "+args.name+' '+args.asset+' '+args.local,shell=True)
+    else:
+        subprocess.call("python saved_search_download.py "+args.name+' '+args.asset+' '+args.local+' '+args.limit,shell=True)
+        
 def metadata_from_parser(args):
     metadata(asset=args.asset,mf=args.mf,mfile=args.mfile,errorlog=args.errorlog,directory=args.dir)
 
@@ -203,6 +209,14 @@ def main(args=None):
     optional_named = parser_downloadpl.add_argument_group('Optional named arguments')
     optional_named.add_argument('--aoi', help='Choose aoi.json file created earlier')
     parser_downloadpl.set_defaults(func=downloadpl_from_parser)
+
+    parser_savedsearch=subparsers.add_parser('savedsearch',help='Tool to download saved searches from Planet Explorer')
+    parser_savedsearch.add_argument('--name',help='Name of your saved search(It is case sensitive)')
+    parser_savedsearch.add_argument('--asset',help='Choose asset type analytic, analytic_xml, analytic_sr, analytic_dn etc')
+    parser_savedsearch.add_argument('--local',help='Local Path (full path address) where PlanetAssets are saved')
+    optional_named = parser_savedsearch.add_argument_group('Optional named arguments')
+    optional_named.add_argument('--limit', help='Choose number of assets you want to download')
+    parser_savedsearch.set_defaults(func=savedsearch_from_parser)
 
     parser_metadata=subparsers.add_parser('metadata',help='Tool to tabulate and convert all metadata files from Planet or Digital Globe Assets')
     parser_metadata.add_argument('--asset', help='Choose PS OrthoTile(PSO)|PS OrthoTile DN(PSO_DN)|PS OrthoTile Visual(PSO_V)|PS4Band Analytic(PS4B)|PS4Band DN(PS4B_DN)|PS4Band SR(PS4B_SR)|PS3Band Analytic(PS3B)|PS3Band DN(PS3B_DN)|PS3Band Visual(PS3B_V)|RE OrthoTile (REO)|RE OrthoTile Visual(REO_V)|DigitalGlobe MultiSpectral(DGMS)|DigitalGlobe Panchromatic(DGP)|PolarGeospatial CenterDEM Strip(PGCDEM)?')
