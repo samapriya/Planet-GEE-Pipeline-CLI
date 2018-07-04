@@ -20,6 +20,7 @@ This tool is designed to facilitate moving data from Planet's API into Google Ea
     	* [Activate or Check Asset](#activate-or-check-asset)
     	* [Check Total size of assets](#check-total-size-of-assets)
     	* [Download Asset](#download-asset)
+	* [Download Saved Searches](#download-saved-searches)
     	* [Metadata Parser](#metadata-parser)
 * [Earth Engine Tools](#earth-engine-tools)
 	* [EE User](#ee-user)
@@ -253,6 +254,23 @@ optional arguments:
 Optional named arguments:
   --aoi AOI      Choose aoi.json file created earlier
 ```
+### Download Saved Searches
+Download assets from saved searches which are saved in your planet explorer. 
+
+```
+usage: ppipe savedsearch [-h] [--name NAME] [--asset ASSET] [--local LOCAL]
+                         [--limit LIMIT]
+
+optional arguments:
+  -h, --help     show this help message and exit
+  --name NAME    Name of your saved search(It is case sensitive)
+  --asset ASSET  Choose asset type analytic, analytic_xml, analytic_sr,
+                 analytic_dn etc
+  --local LOCAL  Local Path (full path address) where PlanetAssets are saved
+
+Optional named arguments:
+  --limit LIMIT  Choose number of assets you want to download
+  ```
 
 ### Metadata Parser
 The metadata tab is a more powerful tool and consists of metadata parsing for All PlanetScope and RapiEye Assets along with Digital Globe MultiSpectral and DigitalGlobe PanChromatic datasets. This was developed as a standalone to process xml metadata files from multiple sources and is important step is the user plans to upload these assets to Google Earth Engine.
