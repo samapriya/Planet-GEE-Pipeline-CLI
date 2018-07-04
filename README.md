@@ -73,7 +73,7 @@ For linux use sudo. This release also contains a windows installer which bypasse
 ppipe -h
 ```
 
-Installation is an optional step; the application can be also run directly by executing ppipe.py script. The advantage of having it installed is being able to execute ppipe as any command line tool. I recommend installation within virtual environment. If you don't want to install, browse into the ppipe folder and try ```python ppipe.py``` to get the same result.
+Installation is an optional step; the application can be also run directly by executing ppipe.py script. The advantage of having it installed is being able to execute ppipe as any command line tool. I recommend installation within virtual environment. If you don't want to install, browse into the ppipe folder and try ```python ppipe.py``` to get to the same result.
 
 ## Getting started
 
