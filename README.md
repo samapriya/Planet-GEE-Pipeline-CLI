@@ -16,13 +16,15 @@ This tool is designed to facilitate moving data from Planet's API into Google Ea
 * [Usage examples](#usage-examples)
 * [Planet Tools](#planet-tools)
 	* [Planet Key](#planet-key)
-    	* [AOI JSON](#aoi-json)
-		* [IDlist](#idlist)
-    	* [Activate or Check Asset](#activate-or-check-asset)
-    	* [Check Total size of assets](#check-total-size-of-assets)
-    	* [Download Asset](#download-asset)
-		* [Download Saved Searches](#download-saved-searches)
-    	* [Metadata Parser](#metadata-parser)
+	* [Planet Quota](#planet-quota)
+	* [AOI JSON](#aoi-json)
+	* [IDlist](#idlist)
+	* [Activate or Check Asset](#activate-or-check-asset)
+	* [Check Total size of assets](#check-total-size-of-assets)
+	* [Download Asset](#download-asset)
+	* [Download Async](#download-async)
+	* [Download Saved Searches](#download-saved-searches)
+	* [Metadata Parser](#metadata-parser)
 * [Earth Engine Tools](#earth-engine-tools)
 	* [EE User](#ee-user)
 	* [EE Quota](#ee-quota)
@@ -149,7 +151,7 @@ Usage examples have been segmented into two parts focusing on both planet tools 
 The Planet Toolsets consists of tools required to access control and download planet labs assets (PlanetScope and RapidEye OrthoTiles) as well as parse metadata in a tabular form which maybe required by other applications.
 
 ### Planet Key
-This tool basically asks you to input your Planet API Key using a password prompt this is then used for all subsequent tools. This tool now includes an option for a quiet authentication using the API key incase it is unable to invoke an interactive environment such as in Google colaboratory.
+This tool basically asks you to input your Planet API Key using a password prompt this is then used for all subsequent tools. This tool now includes an option for a quiet authentication using the API key incase it is unable to invoke an interactive environment such as in Google colaboratory. You can also perform ```planet init``` to set the key as the tool can read from it directly.
 
 ```
 usage: ppipe planetkey [-h] [--type TYPE] [--key KEY]
@@ -163,6 +165,14 @@ Optional named arguments:
 ```
 
 If using on a private machine the Key is saved as a csv file for all future runs of the tool.
+
+### Planet Quota
+This tool prints your Planet quota including allocation name, Total quota, quota used and quota remaining. Calling it is simple
+
+```
+ppipe pquota
+```
+
 
 ### AOI JSON
 The aoijson tab within the toolset allows you to create filters and structure your existing input file to that which can be used with Planet's API. The tool requires inputs with start and end date, along with cloud cover. You can choose from multiple input files types such as KML, Zipped Shapefile, GeoJSON, WKT or even Landsat Tiles based on PathRow numbers. The geo option asks you to select existing files which will be converted into formatted JSON file called aoi.json. If using WRS as an option just type in the 6 digit PathRow combination and it will create a json file for you.
@@ -254,6 +264,43 @@ optional arguments:
 
 Optional named arguments:
   --aoi AOI      Choose aoi.json file created earlier
+```
+
+### Download Async
+This tool is built as a wrapper around the Planet Client's own download tool. The tool included in the planet client is multithreaded and allows the user to activate, poll and download at the same time. This will allow you to pass geometry in terms of a geojson files or all filter like start and end date and time using the .json files you created using the ```aoijson``` tool earlier.
+
+```
+usage: ppipe dasync [-h] [--infile INFILE] [--item ITEM] [--asset ASSET]
+                       [--local LOCAL] [--start START] [--end END]
+                       [--cmin CMIN] [--cmax CMAX]
+
+optional arguments:
+  -h, --help       show this help message and exit
+  --infile INFILE  Choose a geojson from geojson.io or the aoi-json you
+                   created earlier using ppipe aoijson
+  --item ITEM      Choose from Planet Item types Example: PSScene4Band,
+                   PSOrthoTile, REOrthoTile etc
+  --asset ASSET    Choose an asset type example: anlaytic,
+                   analytic_dn,analytic_sr,analytic_xml etc
+  --local LOCAL    Local Path where Planet Item and asset types are saved
+
+Optional named arguments:
+  --start START    Start date filter format YYYY-MM-DD
+  --end END        End date filter format YYYY-MM-DD
+  --cmin CMIN      Cloud cover minimum between 0-1
+  --cmax CMAX      Cloud cover maximum between 0-1
+```
+A setup using geojson needs to include other filters too and a typical setup would be
+
+```ppipe dasync --infile "C:\Users\johndoe\geometry.geojson" --item "PSScene4Band" --asset "analytic" --local "C:\planet" --start "2018-06-01" --end "2018-08-01" --cmin 0 --cmax 0.4```
+
+Using a stuctured json file that you might have created earlier means you don't have to pass additional filters everytime
+
+```python ppipe.py dasync --infile "C:\Users\johndoe\geometry.json" --item "PSScene4Band" --asset "analytic_xml" --local "C:\planet_demo"```
+
+However, you can still decide to pass the filters and the filters you pass will overwrite existing filters
+
+```python ppipe.py dasync --infile "C:\Users\johndoe\geometry.json" --item "PSScene4Band" --asset "analytic_xml" --local "C:\planet_demo" --start "2018-06-01" --end "2018-08-01" --cmin "0" --cmax 0.4
 ```
 ### Download Saved Searches
 Download assets from saved searches which are saved in your planet explorer. 
@@ -538,6 +585,12 @@ Original upload function adapted from [Lukasz's asset manager tool](https://gith
 
 
 # Changelog
+
+
+### v0.3.8
+
+- Now include a tool to print your planet quota details ```pquota```
+- Tool includes ```dasync``` which uses the [Planet's Python Client Downloader](https://github.com/planetlabs/planet-client-python) to activate, download using multithreading
 
 ### v0.3.7
 
