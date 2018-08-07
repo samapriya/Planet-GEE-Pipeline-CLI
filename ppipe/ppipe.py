@@ -17,6 +17,7 @@ from assetsizes import assetsize
 from ee_report import ee_report
 from cli_aoi2json import aoijson
 from cli_metadata import metadata
+from async_download import ddownload
 from hurry import filesize
 from idlst import idl
 from os.path import expanduser
@@ -32,6 +33,14 @@ def planet_key_entry(args):
         except Exception as e:
             print('Failed to Initialize')
 
+def planet_quota():
+    try:
+        subprocess.call('planet_quota.py',shell=True)
+    except Exception as e:
+        print(e)
+def planet_quota_from_parser(args):
+    planet_quota()
+    
 def aoijson_from_parser(args):
     aoijson(start=args.start,end=args.end,cloud=args.cloud,inputfile=args.inputfile,geo=args.geo,loc=args.loc)
 
@@ -68,12 +77,22 @@ def downloadpl_from_parser(args):
         except Exception:
             print(' ')
 
+def dasync_from_parser(args):
+    ddownload(infile=args.infile,
+           item=args.item,
+           asset=args.asset,
+           start=args.start,
+           end=args.end,
+           cmin=args.cmin,
+           cmax=args.cmax,
+           dirc=args.local)
+
 def savedsearch_from_parser(args):
     if args.limit==None:
         subprocess.call("python saved_search_download.py "+args.name+' '+args.asset+' '+args.local,shell=True)
     else:
         subprocess.call("python saved_search_download.py "+args.name+' '+args.asset+' '+args.local+' '+args.limit,shell=True)
-        
+
 def metadata_from_parser(args):
     metadata(asset=args.asset,mf=args.mf,mfile=args.mfile,errorlog=args.errorlog,directory=args.dir)
 
@@ -91,6 +110,7 @@ def ee_auth_entry():
     print('\nSuccessfully saved authorization token.')
 def ee_user_from_parser(args):
     ee_auth_entry()
+
 def quota():
     quota=ee.data.getAssetRootQuota(ee.data.getAssetRoots()[0]['id'])
     print('')
@@ -175,6 +195,9 @@ def main(args=None):
     optional_named.add_argument('--key', help='Your Planet API Key')
     parser_planet_key.set_defaults(func=planet_key_entry)
 
+    parser_planet_quota = subparsers.add_parser('pquota', help='Prints your Planet Quota Details')
+    parser_planet_quota.set_defaults(func=planet_quota_from_parser)
+    
     parser_aoijson=subparsers.add_parser('aoijson',help='Tool to convert KML, Shapefile,WKT,GeoJSON or Landsat WRS PathRow file to AreaOfInterest.JSON file with structured query for use with Planet API 1.0')
     parser_aoijson.add_argument('--start', help='Start date in YYYY-MM-DD?')
     parser_aoijson.add_argument('--end', help='End date in YYYY-MM-DD?')
@@ -209,6 +232,18 @@ def main(args=None):
     optional_named = parser_downloadpl.add_argument_group('Optional named arguments')
     optional_named.add_argument('--aoi', help='Choose aoi.json file created earlier')
     parser_downloadpl.set_defaults(func=downloadpl_from_parser)
+
+    parser_dasync=subparsers.add_parser('dasync',help='Uses the Planet Client Async Downloader to download Planet Assets: Does not require activation')
+    parser_dasync.add_argument('--infile',help='Choose a geojson from geojson.io or the aoi-json you created earlier using ppipe aoijson')
+    parser_dasync.add_argument('--item',help='Choose from Planet Item types Example: PSScene4Band, PSOrthoTile, REOrthoTile etc')
+    parser_dasync.add_argument('--asset',help='Choose an asset type example: anlaytic, analytic_dn,analytic_sr,analytic_xml etc')
+    parser_dasync.add_argument('--local',help='Local Path where Planet Item and asset types are saved')
+    optional_named = parser_dasync.add_argument_group('Optional named arguments')
+    optional_named.add_argument('--start', help='Start date filter format YYYY-MM-DD',default=None)
+    optional_named.add_argument('--end', help='End date filter format YYYY-MM-DD',default=None)
+    optional_named.add_argument('--cmin', help='Cloud cover minimum between 0-1',default=None)
+    optional_named.add_argument('--cmax', help='Cloud cover maximum between 0-1',default=None)
+    parser_dasync.set_defaults(func=dasync_from_parser)
 
     parser_savedsearch=subparsers.add_parser('savedsearch',help='Tool to download saved searches from Planet Explorer')
     parser_savedsearch.add_argument('--name',help='Name of your saved search(It is case sensitive)')

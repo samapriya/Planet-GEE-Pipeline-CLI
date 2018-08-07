@@ -6,7 +6,7 @@
 [![Planet](https://img.shields.io/badge/SupportedBy%3A-Planet%20Ambassador%20Program-brightgreen.svg)](https://www.planet.com/products/education-and-research/)
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/samapriya)
 
-This tool is designed to facilitate moving data from Planet's API into Google Earth Engine and using a metadata library. The tool downloads data into a local storage and allows you to process the metadata before uploading into Google Earth Engine. This tool has been updated to account for metadata property type by going through each metadata column and then uses the **upload manifest** function to upload images for ingestion to EE. This tool also draws from an additional tool I created with is the [Google Earth Engine Asset Manager Addon](https://github.com/samapriya/gee_asset_manager_addon) This includes the batch upload feature, but now additional tools such as generating reports of Earth Engine assets and querying quota to name just a few. The ambition is apart from helping users with batch actions on assets along with interacting and extending capabilities of existing GEE CLI. It is developed case by case basis to include more features in the future as it becomes available or as the need arises. I have now released this as a [PyPI package](https://pypi.org/project/ppipe/) for easy installation and this will be updated along with the the GitHub package. 
+This tool is designed to facilitate moving data from Planet's API into Google Earth Engine and using a metadata library. The tool downloads data into a local storage and allows you to process the metadata before uploading into Google Earth Engine. This tool has been updated to account for metadata property type by going through each metadata column and then uses the **upload manifest** function to upload images for ingestion to EE. This tool also draws from an additional tool I created with is the [Google Earth Engine Asset Manager Addon](https://github.com/samapriya/gee_asset_manager_addon) This includes the batch upload feature, but now additional tools such as generating reports of Earth Engine assets and querying quota to name just a few. The ambition is apart from helping users with batch actions on assets along with interacting and extending capabilities of existing GEE CLI. It is developed case by case basis to include more features in the future as it becomes available or as the need arises. I have now released this as a [PyPI package](https://pypi.org/project/ppipe/) for easy installation and this will be updated along with the the GitHub package.
 
 ![CLI](https://i.imgur.com/qTBnQOk.gif)
 
@@ -64,7 +64,7 @@ You can install using two methods
 
 ```pip install ppipe```
 
-or you can also try 
+or you can also try
 
 ```
 git clone https://github.com/samapriya/Planet-GEE-Pipeline-CLI.git
@@ -84,18 +84,19 @@ Installation is an optional step; the application can be also run directly by ex
 As usual, to print help:
 ```
 usage: ppipe [-h]
-             {
-             ,planetkey,aoijson,idlist,activatepl,space,downloadpl,metadata,ee_user,quota,create,upload,lst,ee_report,assetsize,tasks,taskreport,delete,mover,copy,access,collprop,cancel}
-             ...
+                {
+                ,planetkey,pquota,aoijson,idlist,activatepl,space,downloadpl,dasync,savedsearch,metadata,ee_user,quota,create,upload,lst,ee_report,assetsize,tasks,taskreport,delete,mover,copy,access,collprop,cancel}
+                ...
 
 Planet Pipeline with Google Earth Engine Batch Addons
 
 positional arguments:
-  { ,planetkey,aoijson,idlist,activatepl,space,downloadpl,metadata,ee_user,quota,create,upload,lst,ee_report,assetsize,tasks,taskreport,delete,mover,copy,access,collprop,cancel}
+  { ,planetkey,pquota,aoijson,idlist,activatepl,space,downloadpl,dasync,savedsearch,metadata,ee_user,quota,create,upload,lst,ee_report,assetsize,tasks,taskreport,delete,mover,copy,access,collprop,cancel}
                         ---------------------------------------
                         -----Choose from Planet Tools Below-----
                         ---------------------------------------
     planetkey           Enter your planet API Key
+    pquota              Prints your Planet Quota Details
     aoijson             Tool to convert KML, Shapefile,WKT,GeoJSON or Landsat
                         WRS PathRow file to AreaOfInterest.JSON file with
                         structured query for use with Planet API 1.0
@@ -104,6 +105,9 @@ positional arguments:
     space               Tool to query total download size of activated assets
                         & local space left for download
     downloadpl          Tool to download Planet Assets
+    dasync              Uses the Planet Client Async Downloader to download
+                        Planet Assets: Does not require activation
+    savedsearch         Tool to download saved searches from Planet Explorer
     metadata            Tool to tabulate and convert all metadata files from
                         Planet or Digital Globe Assets
                         -------------------------------------------
@@ -140,6 +144,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
+
 ```
 
 To obtain help for a specific functionality, simply call it with _help_ switch, e.g.: `ppipe upload -h`. If you didn't install ppipe, then you can run it just by going to _ppipe_ directory and running `python ppipe.py [arguments go here]`
@@ -303,7 +308,7 @@ However, you can still decide to pass the filters and the filters you pass will 
 ```python ppipe.py dasync --infile "C:\Users\johndoe\geometry.json" --item "PSScene4Band" --asset "analytic_xml" --local "C:\planet_demo" --start "2018-06-01" --end "2018-08-01" --cmin "0" --cmax 0.4
 ```
 ### Download Saved Searches
-Download assets from saved searches which are saved in your planet explorer. 
+Download assets from saved searches which are saved in your planet explorer.
 
 ```
 usage: ppipe savedsearch [-h] [--name NAME] [--asset ASSET] [--local LOCAL]
@@ -494,7 +499,7 @@ optional arguments:
   -h, --help  show this help message and exit
 ```
 
-Typical usage would be 
+Typical usage would be
 ```
 ppipe delete users/johndoe/test
 ```

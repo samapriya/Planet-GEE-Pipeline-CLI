@@ -17,6 +17,11 @@ Credits
 Changelog
 =========
 
+v0.3.8
+```````
+* Now include a tool to print your planet quota details ```pquota```
+* Tool includes ```dasync``` which uses the Planet's Python Client Downloader to activate, download using multithreading
+
 v0.3.7
 ```````
 * Now allows users to download from saved searches in planet explorer
