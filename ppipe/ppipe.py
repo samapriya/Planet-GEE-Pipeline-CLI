@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import argparse,logging,os,ee,subprocess,getpass,csv,re,time,clipboard
+import sys
 from hurry import filesize
 from collections import Counter
 from ee import oauth
@@ -24,6 +25,7 @@ from os.path import expanduser
 from planet.api.utils import write_planet_json
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 lpath=os.path.dirname(os.path.realpath(__file__))
+sys.path.append(lpath)
 def planet_key_entry(args):
     if args.type=="quiet":
         write_planet_json({'key': args.key})
@@ -35,7 +37,7 @@ def planet_key_entry(args):
 
 def planet_quota():
     try:
-        subprocess.call('planet_quota.py',shell=True)
+        subprocess.call('python planet_quota.py',shell=True)
     except Exception as e:
         print(e)
 def planet_quota_from_parser(args):
