@@ -305,8 +305,8 @@ Using a stuctured json file that you might have created earlier means you don't 
 
 However, you can still decide to pass the filters and the filters you pass will overwrite existing filters
 
-```python ppipe.py dasync --infile "C:\Users\johndoe\geometry.json" --item "PSScene4Band" --asset "analytic_xml" --local "C:\planet_demo" --start "2018-06-01" --end "2018-08-01" --cmin "0" --cmax 0.4
-```
+```python ppipe.py dasync --infile "C:\Users\johndoe\geometry.json" --item "PSScene4Band" --asset "analytic_xml" --local "C:\planet_demo" --start "2018-06-01" --end "2018-08-01" --cmin "0" --cmax 0.4```
+
 ### Download Saved Searches
 Download assets from saved searches which are saved in your planet explorer.
 
