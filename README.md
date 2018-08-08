@@ -591,6 +591,9 @@ Original upload function adapted from [Lukasz's asset manager tool](https://gith
 
 # Changelog
 
+### v0.3.9
+- Minor improvements
+- Fixed issue with path to pquota
 
 ### v0.3.8
 
