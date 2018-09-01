@@ -305,8 +305,8 @@ Using a stuctured json file that you might have created earlier means you don't 
 
 However, you can still decide to pass the filters and the filters you pass will overwrite existing filters
 
-```python ppipe.py dasync --infile "C:\Users\johndoe\geometry.json" --item "PSScene4Band" --asset "analytic_xml" --local "C:\planet_demo" --start "2018-06-01" --end "2018-08-01" --cmin "0" --cmax 0.4```
-
+```python ppipe.py dasync --infile "C:\Users\johndoe\geometry.json" --item "PSScene4Band" --asset "analytic_xml" --local "C:\planet_demo" --start "2018-06-01" --end "2018-08-01" --cmin "0" --cmax 0.4
+```
 ### Download Saved Searches
 Download assets from saved searches which are saved in your planet explorer.
 
@@ -591,7 +591,13 @@ Original upload function adapted from [Lukasz's asset manager tool](https://gith
 
 # Changelog
 
+### v0.4.0
+
+- Optimized size estimation tool includes table size and better handling of size in human readable form
+- Improvements to earth engine quota tool for more accurate quota and human readable
+
 ### v0.3.9
+
 - Minor improvements
 - Fixed issue with path to pquota
 

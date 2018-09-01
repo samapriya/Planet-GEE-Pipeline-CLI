@@ -2,7 +2,6 @@
 
 import argparse,logging,os,ee,subprocess,getpass,csv,re,time,clipboard
 import sys
-from hurry import filesize
 from collections import Counter
 from ee import oauth
 from batch_copy import copy
@@ -19,13 +18,21 @@ from ee_report import ee_report
 from cli_aoi2json import aoijson
 from cli_metadata import metadata
 from async_download import ddownload
-from hurry import filesize
 from idlst import idl
 from os.path import expanduser
 from planet.api.utils import write_planet_json
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 lpath=os.path.dirname(os.path.realpath(__file__))
 sys.path.append(lpath)
+suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+def humansize(nbytes):
+    i = 0
+    while nbytes >= 1024 and i < len(suffixes)-1:
+        nbytes /= 1024.
+        i += 1
+    f = ('%.2f' % nbytes).rstrip('0').rstrip('.')
+    return '%s %s' % (f, suffixes[i])
+
 def planet_key_entry(args):
     if args.type=="quiet":
         write_planet_json({'key': args.key})
@@ -42,7 +49,7 @@ def planet_quota():
         print(e)
 def planet_quota_from_parser(args):
     planet_quota()
-    
+
 def aoijson_from_parser(args):
     aoijson(start=args.start,end=args.end,cloud=args.cloud,inputfile=args.inputfile,geo=args.geo,loc=args.loc)
 
@@ -116,8 +123,8 @@ def ee_user_from_parser(args):
 def quota():
     quota=ee.data.getAssetRootQuota(ee.data.getAssetRoots()[0]['id'])
     print('')
-    print("Total Quota: "+filesize.size(quota['asset_size']['limit']))
-    print("Used Quota: "+filesize.size(quota['asset_size']['usage']))
+    print("Total Quota: "+str(humansize(quota['asset_size']['limit'])))
+    print("Used Quota: "+str(humansize(quota['asset_size']['usage'])))
 
 def quota_from_parser(args):
     quota()
@@ -199,7 +206,7 @@ def main(args=None):
 
     parser_planet_quota = subparsers.add_parser('pquota', help='Prints your Planet Quota Details')
     parser_planet_quota.set_defaults(func=planet_quota_from_parser)
-    
+
     parser_aoijson=subparsers.add_parser('aoijson',help='Tool to convert KML, Shapefile,WKT,GeoJSON or Landsat WRS PathRow file to AreaOfInterest.JSON file with structured query for use with Planet API 1.0')
     parser_aoijson.add_argument('--start', help='Start date in YYYY-MM-DD?')
     parser_aoijson.add_argument('--end', help='End date in YYYY-MM-DD?')

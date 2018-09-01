@@ -18,7 +18,7 @@ def readme():
         return f.read()
 setuptools.setup(
     name='ppipe',
-    version='0.3.9',
+    version='0.4.0',
     packages=find_packages(),
     package_data={'ppipe': ['logconfig.json','aoi.json','wrs_grid.csv']},
     url='https://github.com/samapriya/Planet-GEE-Pipeline-CLI',
@@ -27,7 +27,8 @@ setuptools.setup(
                   'pycrypto>=2.6.1','pyshp>=1.2.12','pytest>=3.5.1','requests-toolbelt>=0.8.0','retrying>=1.3.3','simplejson>=3.15.0',
                       'pypiwin32; platform_system == "Windows"','pywin32; platform_system == "Windows"'],
     license='Apache 2.0',
-    long_description=open('README.txt').read(),
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     classifiers=(
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
