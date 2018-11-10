@@ -9,8 +9,7 @@ from batch_remover import delete
 from batch_uploader import upload
 from config import setup_logging
 from batch_mover import mover
-from collectionprop import collprop
-from taskreport import genreport
+from taskrep import genreport
 from acl_changer import access
 from ee_ls import lst
 from assetsizes import assetsize
@@ -136,10 +135,10 @@ def create_from_parser(args):
 
 def ee_user_from_parser(args):
     ee_authorization()
+
 def genreport_from_parser(args):
     genreport(report=args.r)
-def collprop_from_parser(args):
-    collprop(imcoll=args.coll,prop=args.p)
+
 def assetsize_from_parser(args):
     assetsize(asset=args.asset)
 def lst_from_parser(args):
@@ -324,7 +323,7 @@ def main(args=None):
     parser_tasks.set_defaults(func=tasks_from_parser)
 
     parser_genreport=subparsers.add_parser('taskreport',help='Create a report of all tasks and exports to a CSV file')
-    parser_genreport.add_argument('--r',help='Folder Path where the reports will be saved')
+    parser_genreport.add_argument('--r',help='Path to csv report file')
     parser_genreport.set_defaults(func=genreport_from_parser)
 
 
@@ -342,16 +341,11 @@ def main(args=None):
     parser_copy.add_argument('--final',help='New path for assets')
     parser_copy.set_defaults(func=copy_from_parser)
 
-    parser_access = subparsers.add_parser('access',help='Sets Permissions for Images, Collection or all assets in EE Folder Example: python ee_permissions.py --mode "folder" --asset "users/john/doe" --user "jimmy@doe.com:R"')
-    parser_access.add_argument('--mode', help='This lets you select if you want to change permission or folder/collection/image', required=True)
+    parser_access = subparsers.add_parser('access',help='Sets Permissions for items in folder')
     parser_access.add_argument('--asset', help='This is the path to the earth engine asset whose permission you are changing folder/collection/image', required=True)
-    parser_access.add_argument('--user', help="""This is the email address to whom you want to give read or write permission Usage: "john@doe.com:R" or "john@doe.com:W" R/W refers to read or write permission""", required=True, default=False)
+    parser_access.add_argument('--user', help='Full email address of the user, try using "AllUsers" to make it public', required=True, default=False)
+    parser_access.add_argument('--role', help='Choose between reader, writer or delete', required=True)
     parser_access.set_defaults(func=access_from_parser)
-
-    parser_collprop=subparsers.add_parser('collprop',help='Sets Overall Properties for Image Collection')
-    parser_collprop.add_argument('--coll',help='Path of Image Collection')
-    parser_collprop.add_argument('--p',help='"system:description=Description"/"system:provider_url=url"/"system:tags=tags"/"system:title=title')
-    parser_collprop.set_defaults(func=collprop_from_parser)
 
     parser_cancel = subparsers.add_parser('cancel', help='Cancel all running tasks')
     parser_cancel.set_defaults(func=cancel_all_running_tasks_from_parser)

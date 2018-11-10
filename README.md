@@ -39,7 +39,6 @@ This tool is designed to facilitate moving data from Planet's API into Google Ea
 	* [Assets Move](#assets-move)
 	* [Assets Copy](#assets-copy)
 	* [Assets Access](#assets-access)
-	* [Set Collection Property](#set-collection-property)
 	* [Cancel all tasks](#cancel-all-tasks)
 * [Credits](#credits)
 
@@ -467,22 +466,22 @@ A simple setup is the following
 ### Task Query
 This script counts all currently running,ready,completed,failed and cancelled tasks along with failed tasks. This is linked to the account you initialized with your google earth engine account. This takes no argument.
 ```
-usage: geeadd.py tasks [-h]
+usage: ppipe.py tasks [-h]
 
 optional arguments:
   -h, --help  show this help message and exit
 
-geeadd.py tasks
+ppipe.py tasks
 ```
 
 ### Task Report
 Sometimes it is important to generate a report based on all tasks that is running or has finished. Generated report includes taskId, data time, task status and type
 ```
-usage: ppipe taskreport [-h] [--r R]
+usage: ppipe.py taskreport [-h] [--r R]
 
 optional arguments:
   -h, --help  show this help message and exit
-  --r R       Folder Path where the reports will be saved
+  --r R       Path to csv report file
 ```
 
 ### Delete a collection with content
@@ -541,30 +540,15 @@ ppipe mover --initial "users/johndoe/myfolder/myponycollection" --final "users/j
 ### Assets Access
 This tool allows you to set asset acess for either folder , collection or image recursively meaning you can add collection access properties for multiple assets at the same time.
 ```
-usage: geeadd access [-h] --mode MODE --asset ASSET --user USER
+usage: ppipe.py access [-h] --asset ASSET --user USER --role ROLE
 
 optional arguments:
   -h, --help     show this help message and exit
-  --mode MODE    This lets you select if you want to change permission or
-                 folder/collection/image
   --asset ASSET  This is the path to the earth engine asset whose permission
                  you are changing folder/collection/image
-  --user USER    This is the email address to whom you want to give read or
-                 write permission Usage: "john@doe.com:R" or "john@doe.com:W"
-                 R/W refers to read or write permission
-geeadd.py access --mode folder --asset "folder/collection/image" --user "john@doe.com:R"
-```
-
-### Set Collection Property
-This script is derived from the ee tool to set collection properties and will set overall properties for collection.
-```
-usage: ppipe collprop [-h] [--coll COLL] [--p P]
-
-optional arguments:
-  -h, --help   show this help message and exit
-  --coll COLL  Path of Image Collection
-  --p P        "system:description=Description"/"system:provider_url=url"/"sys
-               tem:tags=tags"/"system:title=title
+  --user USER    Full email address of the user, try using "AllUsers" to make
+                 it public
+  --role ROLE    Choose between reader, writer or delete
 ```
 
 ### Cancel all tasks
@@ -591,15 +575,9 @@ Original upload function adapted from [Lukasz's asset manager tool](https://gith
 
 # Changelog
 
-### v0.4.0
-
-- Optimized size estimation tool includes table size and better handling of size in human readable form
-- Improvements to earth engine quota tool for more accurate quota and human readable
-
-### v0.3.9
-
-- Minor improvements
-- Fixed issue with path to pquota
+### v0.4.1
+- Major improvements to earth engine tools including better task reporting, batch copy and move
+- Improvement to the access tool which allows you to add read/write permissions for entire EE folder and collections for specific users
 
 ### v0.3.8
 
