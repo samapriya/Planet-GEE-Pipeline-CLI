@@ -169,11 +169,11 @@ def ee_report_from_parser(args):
     ee_report(output=args.outfile)
 
 def mover_from_parser(args):
-	mover(assetpath=args.assetpath,destinationpath=args.finalpath)
+    mover(collection_path=args.assetpath,final_path=args.finalpath)
 def copy_from_parser(args):
-	copy(initial=args.initial,final=args.final)
+    copy(collection_path=args.initial,final_path=args.final)
 def access_from_parser(args):
-	access(mode=args.mode,asset=args.asset,user=args.user)
+    access(collection_path=args.asset,user=args.user,role=args.role)
 def tasks():
     statuses=ee.data.getTaskList()
     st=[]
