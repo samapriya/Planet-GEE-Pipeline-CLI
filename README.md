@@ -1,8 +1,8 @@
 # Planet GEE Pipeline CLI
 
 [![PyPI version](https://badge.fury.io/py/ppipe.svg)](https://badge.fury.io/py/ppipe)
+![Build Status](https://img.shields.io/badge/dynamic/json.svg?label=downloads&url=https%3A%2F%2Fpypistats.org%2Fapi%2Fpackages%2Fppipe%2Frecent%3Fperiod%3Dmonth&query=%24.data.last_month&colorB=blue&suffix=%2fmonth)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1316886.svg)](https://doi.org/10.5281/zenodo.1316886)
-[![JetStream](https://img.shields.io/badge/SupportedBy%3A-JetStream-brightgreen.svg)](https://jetstream-cloud.org/)
 [![Planet](https://img.shields.io/badge/SupportedBy%3A-Planet%20Ambassador%20Program-brightgreen.svg)](https://www.planet.com/products/education-and-research/)
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/samapriya)
 
