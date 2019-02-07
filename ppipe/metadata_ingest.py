@@ -1,3 +1,48 @@
+from __future__ import print_function
+__copyright__ = """
+
+    Copyright 2016 Lukasz Tracewski
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+"""
+__license__ = "Apache 2.0"
+
+__Modifications_copyright__ = """
+
+    Copyright 2019 Samapriya Roy
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+"""
+__license__ = "Apache 2.0"
+
+'''
+Modifications to file:
+- Uses selenium based upload instead of simple login
+- Removed multipart upload
+- Added poster for streaming upload
+'''
 import ast
 import csv
 import getpass
@@ -10,40 +55,24 @@ import subprocess
 import json
 import manifest_lib
 import pandas as pd
-if sys.version_info > (3, 0):
-    from urllib.parse import unquote
-else:
-    from urllib import unquote
-
 import ee
 import requests
 import retrying
-from requests_toolbelt import MultipartEncoder
-from bs4 import BeautifulSoup
-
 from google.cloud import storage
-
 from metadata_loader import load_metadata_from_csv, validate_metadata_from_csv
+from selenium import webdriver
+from selenium.webdriver import Firefox
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 lp=os.path.dirname(os.path.realpath(__file__))
-def upload(user, source_path, destination_path, manifest=None,metadata_path=None, multipart_upload=False, nodata_value=None, bucket_name=None):
-
-    """
-    Uploads content of a given directory to GEE. The function first uploads an asset to Google Cloud Storage (GCS)
-    and then uses ee.data.startIngestion to put it into GEE, Due to GCS intermediate step, users is asked for
-    Google's account name and password.
-
-    In case any exception happens during the upload, the function will repeat the call a given number of times, after
-    which the error will be propagated further.
-
-    :param user: name of a Google account
-    :param source_path: path to a directory
-    :param destination_path: where to upload (absolute path)
-    :param metadata_path: (optional) path to file with metadata
-    :param multipart_upload: (optional) alternative mode op upload - use if the other one fails
-    :param nodata_value: (optinal) value to burn into raster for missind data in the image
-    :return:
-    """
+sys.path.append(lp)
+ee.Initialize()
+def selupload(user, source_path, destination_path, manifest=None,metadata_path=None, nodata_value=None, bucket_name=None):
     submitted_tasks_id = {}
 
     __verify_path_for_upload(destination_path)
@@ -51,7 +80,7 @@ def upload(user, source_path, destination_path, manifest=None,metadata_path=None
     path = os.path.join(os.path.expanduser(source_path), '*.tif')
     all_images_paths = glob.glob(path)
     if len(all_images_paths) == 0:
-        logging.error('%s does not contain any tif images.', path)
+        print('%s does not contain any tif images.', path)
         sys.exit(1)
 
     metadata = load_metadata_from_csv(metadata_path) if metadata_path else None
@@ -68,19 +97,19 @@ def upload(user, source_path, destination_path, manifest=None,metadata_path=None
     no_images = len(images_for_upload_path)
 
     if no_images == 0:
-        logging.error('No images found that match %s. Exiting...', path)
+        print('No images found that match %s. Exiting...', path)
         sys.exit(1)
 
     failed_asset_writer = FailedAssetsWriter()
 
     for current_image_no, image_path in enumerate(images_for_upload_path):
-        logging.info('Processing image %d out of %d: %s', current_image_no+1, no_images, image_path)
+        print('Processing image '+str(current_image_no+1)+' out of '+str(no_images)+': '+str(image_path))
         filename = __get_filename_from_path(path=image_path)
 
         asset_full_path = destination_path + '/' + filename
 
         if metadata and not filename in metadata:
-            logging.warning("No metadata exists for image %s: it will not be ingested", filename)
+            print("No metadata exists for image "+str(filename)+" : it will not be ingested")
             failed_asset_writer.writerow([filename, 0, 'Missing metadata'])
             continue
 
@@ -113,8 +142,7 @@ def upload(user, source_path, destination_path, manifest=None,metadata_path=None
         try:
             if user is not None:
                 gsid = __upload_file_gee(session=google_session,
-                                                  file_path=image_path,
-                                                  use_multipart=multipart_upload)
+                                                  file_path=image_path)
             else:
                 gsid = __upload_file_gcs(storage_client, bucket_name, image_path)
 
@@ -151,7 +179,7 @@ def upload(user, source_path, destination_path, manifest=None,metadata_path=None
                             json.dump(data, outfile)
                         subprocess.call("earthengine upload_manifest "+'"'+os.path.join(lp,'data.json')+'"',shell=True)
         except Exception as e:
-            logging.exception('Upload of %s has failed.', filename)
+            print('Upload of '+str(filename)+' has failed.')
             failed_asset_writer.writerow([filename, 0, str(e)])
 
         __check_for_failed_tasks_and_report(tasks=submitted_tasks_id, writer=failed_asset_writer)
@@ -175,8 +203,8 @@ def __verify_path_for_upload(path):
     folder = path[:path.rfind('/')]
     response = ee.data.getInfo(folder)
     if not response:
-        logging.error('%s is not a valid destination. Make sure full path is provided e.g. users/user/nameofcollection '
-                      'or projects/myproject/myfolder/newcollection and that you have write access there.', path)
+        print(str(path)+' is not a valid destination. Make sure full path is provided e.g. users/user/nameofcollection '
+                      'or projects/myproject/myfolder/newcollection and that you have write access there.')
         sys.exit(1)
 
 
@@ -187,10 +215,10 @@ def __find_remaining_assets_for_upload(path_to_local_assets, path_remote):
         if len(remote_assets) > 0:
             assets_left_for_upload = set(local_assets) - set(remote_assets)
             if len(assets_left_for_upload) == 0:
-                logging.warning('Collection already exists and contains all assets provided for upload. Exiting ...')
+                print('Collection already exists and contains all assets provided for upload. Exiting ...')
                 sys.exit(1)
 
-            logging.info('Collection already exists. %d assets left for upload to %s.', len(assets_left_for_upload), path_remote)
+            print('Collection already exists. '+str(len(assets_left_for_upload))+' assets left for upload to '+str(path_remote))
             assets_left_for_upload_full_path = [path for path in path_to_local_assets
                                                 if __get_filename_from_path(path) in assets_left_for_upload]
             return assets_left_for_upload_full_path
@@ -217,16 +245,16 @@ def __validate_metadata(path_for_upload, metadata_path):
     missing_keys = keys_in_data - keys_in_metadata
 
     if missing_keys:
-        logging.warning('%d images does not have a corresponding key in metadata', len(missing_keys))
+        print(str(len(missing_keys)+' images does not have a corresponding key in metadata'))
         print('\n'.join(e for e in missing_keys))
     else:
-        logging.info('All images have metadata available')
+        print('All images have metadata available')
 
     if not validation_result.success:
         print('Validation finished with errors. Type "y" to continue, default NO: ')
         choice = input().lower()
         if choice not in ['y', 'yes']:
-            logging.info('Application will terminate')
+            print('Application will terminate')
             exit(1)
 
 
@@ -234,66 +262,62 @@ def __extract_metadata_for_image(filename, metadata):
     if filename in metadata:
         return metadata[filename]
     else:
-        logging.warning('Metadata for %s not found', filename)
+        print('Metadata for '+str(filename)+' not found')
         return None
 
 
+@retrying.retry(retry_on_exception=retry_if_ee_error, wait_exponential_multiplier=1000, wait_exponential_max=4000, stop_max_attempt_number=3)
 def __get_google_auth_session(username, password):
-    google_accounts_url = 'https://accounts.google.com'
-    authentication_url = 'https://accounts.google.com/ServiceLoginAuth'
-
-    session = requests.session()
-
-    login_html = session.get(google_accounts_url)
-    soup_login = BeautifulSoup(login_html.content, 'html.parser').find('form').find_all('input')
-    payload = {}
-    for u in soup_login:
-        if u.has_attr('value'):
-            payload[u['name']] = u['value']
-
-    payload['Email'] = username
-    payload['Passwd'] = password
-
-    auto = login_html.headers.get('X-Auto-Login')
-    follow_up = unquote(unquote(auto)).split('continue=')[-1]
-
-    payload['continue'] = follow_up
-
-    session.post(authentication_url, data=payload)
+    ee.Initialize()
+    options = Options()
+    options.add_argument('-headless')
+    authorization_url="https://code.earthengine.google.com"
+    uname=str(username)
+    passw=str(password)
+    if os.name=="nt":
+        driver = Firefox(executable_path=os.path.join(lp,"geckodriver.exe"),firefox_options=options)
+    elif os.name=="posix":
+        driver = Firefox(executable_path=os.path.join(lp,"geckodriver"),firefox_options=options)
+    driver.get(authorization_url)
+    time.sleep(5)
+    username = driver.find_element_by_xpath('//*[@id="identifierId"]')
+    username.send_keys(uname)
+    driver.find_element_by_id("identifierNext").click()
+    time.sleep(5)
+    #print('username')
+    passw=driver.find_element_by_name("password").send_keys(passw)
+    driver.find_element_by_id("passwordNext").click()
+    time.sleep(5)
+    #print('password')
+    try:
+        driver.find_element_by_xpath("//div[@id='view_container']/form/div[2]/div/div/div/ul/li/div/div[2]/p").click()
+        time.sleep(5)
+        driver.find_element_by_xpath("//div[@id='submit_approve_access']/content/span").click()
+        time.sleep(5)
+    except Exception as e:
+        pass
+    cookies = driver.get_cookies()
+    session = requests.Session()
+    for cookie in cookies:
+        session.cookies.set(cookie['name'], cookie['value'])
+    driver.close()
     return session
 
-
 def __get_upload_url(session):
-    # get url and discard; somehow it does not work for the first time
-    _ = session.get('https://ee-api.appspot.com/assets/upload/geturl?')
-    r = session.get('https://ee-api.appspot.com/assets/upload/geturl?')
-    if r.text.startswith('\n<!DOCTYPE html>'):
-        logging.error('Incorrect credentials. Probably. If you are sure the credentials are OK, refresh the authentication token. '
-                      'If it did not work report a problem. They might have changed something in the Matrix.')
-        sys.exit(1)
-    d = ast.literal_eval(r.text)
-    return d['url']
+    r=session.get("https://code.earthengine.google.com/assets/upload/geturl")
+    try:
+        d = ast.literal_eval(r.text)
+        return d['url']
+    except Exception as e:
+        print(e)
 
 @retrying.retry(retry_on_exception=retry_if_ee_error, wait_exponential_multiplier=1000, wait_exponential_max=4000, stop_max_attempt_number=3)
-def __upload_file_gee(session, file_path, use_multipart):
+def __upload_file_gee(session, file_path):
     with open(file_path, 'rb') as f:
         upload_url = __get_upload_url(session)
-
-
-        if use_multipart:
-            form = MultipartEncoder({
-                "documents": (file_path, f, "application/octet-stream"),
-                "composite": "NONE",
-            })
-            headers = {"Prefer": "respond-async", "Content-Type": form.content_type}
-            resp = session.post(upload_url, headers=headers, data=form)
-        else:
-            files = {'file': f}
-            resp = session.post(upload_url, files=files)
-
+        files = {'file': f}
+        resp = session.post(upload_url, files=files)
         gsid = resp.json()[0]
-        #print('GSID',gsid)
-
         return gsid
 
 @retrying.retry(retry_on_exception=retry_if_ee_error, wait_exponential_multiplier=1000, wait_exponential_max=4000, stop_max_attempt_number=3)
@@ -310,7 +334,7 @@ def __upload_file_gcs(storage_client, bucket_name, image_path):
 
 def __periodic_check(current_image, period, tasks, writer):
     if (current_image + 1) % period == 0:
-        logging.info('Periodic check')
+        print('Periodic check')
         __check_for_failed_tasks_and_report(tasks=tasks, writer=writer)
         # Time to check how many tasks are running!
         __wait_for_tasks_to_complete(waiting_time=10, no_allowed_tasks_running=20)
@@ -328,7 +352,7 @@ def __check_for_failed_tasks_and_report(tasks, writer):
             filename = tasks[task_id]
             error_message = status['error_message']
             writer.writerow([filename, task_id, error_message])
-            logging.error('Ingestion of image %s has failed with message %s', filename, error_message)
+            print('Ingestion of image '+str(filename)+' has failed with message '+str(error_message))
 
     tasks.clear()
 
@@ -356,10 +380,10 @@ def __collection_exist(path):
 
 def __create_image_collection(full_path_to_collection):
     if __collection_exist(full_path_to_collection):
-        logging.warning("Collection %s already exists", full_path_to_collection)
+        print('Collection '+str(full_path_to_collection)+' already exists')
     else:
         ee.data.createAsset({'type': ee.data.ASSET_TYPE_IMAGE_COLL}, full_path_to_collection)
-        logging.info('New collection %s created', full_path_to_collection)
+        print('New collection '+str(full_path_to_collection)+' created')
 
 
 def __get_asset_names_from_collection(collection_path):

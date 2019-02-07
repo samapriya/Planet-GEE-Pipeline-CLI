@@ -1,12 +1,31 @@
+__copyright__ = """
+
+    Copyright 2019 Samapriya Roy
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+"""
+__license__ = "Apache 2.0"
+
 #! /usr/bin/env python
 
 import argparse,logging,os,ee,subprocess,getpass,csv,re,time,clipboard
-import sys
+import sys,platform
 from collections import Counter
 from ee import oauth
 from batch_copy import copy
 from batch_remover import delete
-from batch_uploader import upload
+from metadata_ingest import selupload
 from config import setup_logging
 from batch_mover import mover
 from taskrep import genreport
@@ -23,6 +42,21 @@ from planet.api.utils import write_planet_json
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 lpath=os.path.dirname(os.path.realpath(__file__))
 sys.path.append(lpath)
+
+
+def update():
+    if str(platform.system()) =="Windows":
+        os.system("python sel-latest-win.py")
+        print("Updated selenium driver for Windows64")
+    elif str(platform.system()) =="Linux":
+        os.system("python sel-latest-linux.py")
+        print("Updated selenium driver for Linux64")
+    else:
+        print("Architecture not recognized")
+def update_from_parser(args):
+    update()
+
+
 suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
 def humansize(nbytes):
     i = 0
@@ -156,15 +190,15 @@ def cancel_all_running_tasks_from_parser(args):
 def delete_collection_from_parser(args):
     delete(args.id)
 
-def upload_from_parser(args):
-    upload(user=args.user,
+def selupload_from_parser(args):
+    selupload(user=args.user,
            source_path=args.source,
            destination_path=args.dest,
            metadata_path=args.metadata,
-           multipart_upload=args.large,
            nodata_value=args.nodata,
            bucket_name=args.bucket,
            manifest=args.manifest)
+
 def ee_report_from_parser(args):
     ee_report(output=args.outfile)
 
@@ -274,6 +308,9 @@ def main(args=None):
     parser_EE = subparsers.add_parser(' ', help='----Choose from Earth Engine Tools Below----')
     parser_EE2 = subparsers.add_parser(' ', help='-------------------------------------------')
 
+    parser_update=subparsers.add_parser('update',help='Updates Selenium drivers for firefox [windows or linux systems]')
+    parser_update.set_defaults(func=update_from_parser)
+
     parser_ee_user = subparsers.add_parser('ee_user', help='Get Earth Engine API Key & Paste it back to Command line/shell to change user')
     parser_ee_user.set_defaults(func=ee_user_from_parser)
 
@@ -285,22 +322,18 @@ def main(args=None):
     parser_create.add_argument('--path', help='This is the path for the earth engine asset to be created full path is needsed eg: users/johndoe/collection', required=True)
     parser_create.set_defaults(func=create_from_parser)
 
-    parser_upload = subparsers.add_parser('upload', help='Batch Asset Uploader.')
-    required_named = parser_upload.add_argument_group('Required named arguments.')
+    parser_selupload = subparsers.add_parser('selupload', help='Batch Asset Uploader for Planet Items & Assets using Selenium')
+    required_named = parser_selupload.add_argument_group('Required named arguments.')
     required_named.add_argument('--source', help='Path to the directory with images for upload.', required=True)
     required_named.add_argument('--dest', help='Destination. Full path for upload to Google Earth Engine, e.g. users/pinkiepie/myponycollection', required=True)
     required_named.add_argument('-m', '--metadata', help='Path to CSV with metadata.')
     required_named.add_argument('-mf','--manifest',help='Manifest type to be used,Choose PS OrthoTile(PSO)|PS OrthoTile DN(PSO_DN)|PS OrthoTile Visual(PSO_V)|PS4Band Analytic(PS4B)|PS4Band DN(PS4B_DN)|PS4Band SR(PS4B_SR)|PS3Band Analytic(PS3B)|PS3Band DN(PS3B_DN)|PS3Band Visual(PS3B_V)|RE OrthoTile (REO)|RE OrthoTile Visual(REO_V)')
-    optional_named = parser_upload.add_argument_group('Optional named arguments')
-    optional_named.add_argument('--large', action='store_true', help='(Advanced) Use multipart upload. Might help if upload of large '
-                                                                     'files is failing on some systems. Might cause other issues.')
+    optional_named = parser_selupload.add_argument_group('Optional named arguments')
     optional_named.add_argument('--nodata', type=int, help='The value to burn into the raster as NoData (missing data)')
-
     required_named.add_argument('-u', '--user', help='Google account name (gmail address).')
-    optional_named.add_argument('-s', '--service-account', help='Google Earth Engine service account.')
-    optional_named.add_argument('-k', '--private-key', help='Google Earth Engine private key file.')
     optional_named.add_argument('-b', '--bucket', help='Google Cloud Storage bucket name.')
-    parser_upload.set_defaults(func=upload_from_parser)
+
+    parser_selupload.set_defaults(func=selupload_from_parser)
 
     parser_lst = subparsers.add_parser('lst',help='List assets in a folder/collection or write as text file')
     required_named = parser_lst.add_argument_group('Required named arguments.')

@@ -26,6 +26,7 @@ This tool is designed to facilitate moving data from Planet's API into Google Ea
 	* [Download Saved Searches](#download-saved-searches)
 	* [Metadata Parser](#metadata-parser)
 * [Earth Engine Tools](#earth-engine-tools)
+    * [selenium update](#selenium-update)
 	* [EE User](#ee-user)
 	* [EE Quota](#ee-quota)
 	* [Create](#create)
@@ -354,6 +355,11 @@ Optional named arguments:
 ## Earth Engine Tools
 The ambition is apart from helping user with batch actions on assets along with interacting and extending capabilities of existing GEE CLI. It is developed case by case basis to include more features in the future as it becomes available or as need arises. This is also a seperate package for earth engine users to use and can be downloaded [here](https://github.com/samapriya/gee_asset_manager_addon)
 
+### selenium update
+**This is a key step since all upload function depends on this step, so make sure you run this**. This downloads selenium driver and places to your local directory for windows and Linux subsystems. This is the first step to use selenium supported upload.
+
+``` ppipe update```
+
 ### EE User
 This tool is designed to allow different users to change earth engine authentication credentials. The tool invokes the authentication call and copies the authentication key verification website to the clipboard which can then be pasted onto a browser and the generated key can be pasted back. This command takes in no arguments.
 
@@ -376,14 +382,13 @@ optional arguments:
 ```
 
 ### Batch uploader
-The script creates an Image Collection from GeoTIFFs in your local directory. By default, the collection name is the same as the local
-directory name; with optional parameter you can provide a different name. You have to process the metadata for images, which is covered in the next section along with a manifest type for Planet image and asset:
+The script creates an Image Collection from GeoTIFFs in your local directory. By default, the image name in the collection is the same as the local directory name; with the optional parameter you can provide a different name.You have to process the metadata for images, which is covered in the next section along with a manifest type for Planet image and asset:
 [Metadata parser](#metadata-parser).
 
 ```
-usage: ppipe upload [-h] --source SOURCE --dest DEST [-m METADATA]
-                    [-mf MANIFEST] [--large] [--nodata NODATA] [-u USER]
-                    [-s SERVICE_ACCOUNT] [-k PRIVATE_KEY] [-b BUCKET]
+usage: ppipe selupload [-h] --source SOURCE --dest DEST [-m METADATA]
+                          [--large] [--nodata NODATA] [--bands BANDS]
+                          [-u USER] [-b BUCKET]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -392,31 +397,21 @@ Required named arguments.:
   --source SOURCE       Path to the directory with images for upload.
   --dest DEST           Destination. Full path for upload to Google Earth
                         Engine, e.g. users/pinkiepie/myponycollection
-  -m METADATA, --metadata METADATA
-                        Path to CSV with metadata.
-  -mf MANIFEST, --manifest MANIFEST
-                        Manifest type to be used,Choose PS OrthoTile(PSO)|PS
-                        OrthoTile DN(PSO_DN)|PS OrthoTile
-                        Visual(PSO_V)|PS4Band Analytic(PS4B)|PS4Band
-                        DN(PS4B_DN)|PS4Band SR(PS4B_SR)|PS3Band
-                        Analytic(PS3B)|PS3Band DN(PS3B_DN)|PS3Band
-                        Visual(PS3B_V)|RE OrthoTile (REO)|RE OrthoTile
-                        Visual(REO_V)
   -u USER, --user USER  Google account name (gmail address).
 
 Optional named arguments:
+  -m METADATA, --metadata METADATA
+                        Path to CSV with metadata.
   --large               (Advanced) Use multipart upload. Might help if upload
                         of large files is failing on some systems. Might cause
                         other issues.
   --nodata NODATA       The value to burn into the raster as NoData (missing
                         data)
-  -s SERVICE_ACCOUNT, --service-account SERVICE_ACCOUNT
-                        Google Earth Engine service account.
-  -k PRIVATE_KEY, --private-key PRIVATE_KEY
-                        Google Earth Engine private key file.
+  --bands BANDS         Comma-separated list of names to use for the image
+                        bands. Spacesor other special characters are not
+                        allowed.
   -b BUCKET, --bucket BUCKET
                         Google Cloud Storage bucket name.
-
 ```
 
 ### Asset List
@@ -574,6 +569,10 @@ Original upload function adapted from [Lukasz's asset manager tool](https://gith
 
 
 # Changelog
+
+### v0.4.3
+- Added selenium uploader to upload images to Earth Engine after auth issues
+- Overall improvements to the tools and added notifications and contribution notices
 
 ### v0.4.1
 - Major improvements to earth engine tools including better task reporting, batch copy and move
