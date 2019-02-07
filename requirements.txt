@@ -7,7 +7,7 @@ hurry.filesize==0.9
 planet==1.1.0
 pandas>=0.23.0
 psutil==5.4.5
-pycrypto==2.6.1
+pyOpenSSL==19.0.0
 pyshp==1.2.12
 pytest==3.5.1
 requests-toolbelt==0.8.0
