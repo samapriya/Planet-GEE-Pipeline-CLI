@@ -50,6 +50,8 @@ This assumes that you have native python & pip installed in your system, you can
 
 If you get no errors and you have python 2.7.14 or higher you should be good to go. Please note that I have released this as a python 2.7 but can be easily modified for python 3.
 
+**Make sure you install OpenSSL from [this page](https://www.openssl.org/)**
+
 **This toolbox also uses some functionality from GDAL**
 For installing GDAL in Ubuntu
 ```
