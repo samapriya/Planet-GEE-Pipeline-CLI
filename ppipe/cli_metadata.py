@@ -84,7 +84,7 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([eopfilename,epoch,productType,orbit,provider,instrument,satellite_id,tile_id,bands,epsg_code,resampling_kernel
+                        writer.writerow([filename.split('.')[0],epoch,productType,orbit,provider,instrument,satellite_id,tile_id,bands,epsg_code,resampling_kernel
                                          ,number_rows,number_columns,format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
                                          format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')
                                          ,psbrad,format(float(psb1ref),'.8f'),format(float(psb2ref),'.8f'),format(float(psb3ref),'.8f'),
@@ -146,7 +146,7 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([eopfilename,epoch,productType,orbit,provider,instrument,satellite_id,tile_id,bands,epsg_code,resampling_kernel
+                        writer.writerow([filename.split('.')[0],epoch,productType,orbit,provider,instrument,satellite_id,tile_id,bands,epsg_code,resampling_kernel
                                          ,number_rows,number_columns,format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
                                          format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')])
                     csvfile.close()
@@ -205,7 +205,7 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([eopfilename,epoch,productType,orbit,provider,instrument,satellite_id,tile_id,bands,epsg_code,resampling_kernel
+                        writer.writerow([filename.split('.')[0],epoch,productType,orbit,provider,instrument,satellite_id,tile_id,bands,epsg_code,resampling_kernel
                                          ,number_rows,number_columns,format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
                                          format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')])
                     csvfile.close()
@@ -275,7 +275,7 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([eopfilename,epoch,productType,orbit,provider,instrument,satellite_id,bands,epsg_code,resampling_kernel
+                        writer.writerow([filename.split('.')[0],epoch,productType,orbit,provider,instrument,satellite_id,bands,epsg_code,resampling_kernel
                                          ,number_rows,number_columns,format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
                                          format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')
                                          ,psbrad,format(float(psb1ref),'.8f'),format(float(psb2ref),'.8f'),format(float(psb3ref),'.8f'),
@@ -339,7 +339,7 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([eopfilename,epoch,productType,orbit,provider,instrument,satellite_id,bands,epsg_code,resampling_kernel
+                        writer.writerow([filename.split('.')[0],epoch,productType,orbit,provider,instrument,satellite_id,bands,epsg_code,resampling_kernel
                                          ,number_rows,number_columns,format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
                                          format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')])
                     csvfile.close()
@@ -406,7 +406,7 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([eopfilename,epoch,productType,orbit,provider,instrument,satellite_id,bands,epsg_code,resampling_kernel
+                        writer.writerow([filename.split('.')[0],epoch,productType,orbit,provider,instrument,satellite_id,bands,epsg_code,resampling_kernel
                                          ,number_rows,number_columns,format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
                                          format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')
                                          ,psbrad,format(float(psb1ref),'.8f'),format(float(psb2ref),'.8f'),format(float(psb3ref),'.8f')])
@@ -468,7 +468,7 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([eopfilename,epoch,productType,orbit,provider,instrument,satellite_id,bands,epsg_code,resampling_kernel
+                        writer.writerow([filename.split('.')[0],epoch,productType,orbit,provider,instrument,satellite_id,bands,epsg_code,resampling_kernel
                                          ,number_rows,number_columns,format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
                                          format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')])
                     csvfile.close()
@@ -529,7 +529,7 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([eopfilename,epoch,productType,orbit,provider,instrument,satellite_id,bands,epsg_code,resampling_kernel
+                        writer.writerow([filename.split('.')[0],epoch,productType,orbit,provider,instrument,satellite_id,bands,epsg_code,resampling_kernel
                                          ,number_rows,number_columns,format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
                                          format(float(psilaz),'.2f'),format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f')])
                     csvfile.close()
@@ -545,7 +545,7 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
             path, dirs, files = next(os.walk(folder))
             file_count = len(files)
             i=1
-            with open(mfile,'wb') as csvfile:              
+            with open(mfile,'wb') as csvfile:
                 writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "product_type",
                                                           "tile_id","order_id","orbit","provider",
                                                           "instrument","satellite_id","number_of_bands",
@@ -593,7 +593,7 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([id_no,epoch,str(productType),str(tile_id),str(order_id),
+                        writer.writerow([filename.split('.')[0],epoch,str(productType),str(tile_id),str(order_id),
                                          str(orbit),str(provider),str(instrument),str(satellite_id),
                                          number_of_bands,epsg_code,resampling_kernel,number_rows,number_columns,
                                          format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
@@ -612,7 +612,7 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
             path, dirs, files = next(os.walk(folder))
             file_count = len(files)
             i=1
-            with open(mfile,'wb') as csvfile:              
+            with open(mfile,'wb') as csvfile:
                 writer=csv.DictWriter(csvfile,fieldnames=["id_no", "system:time_start", "product_type",
                                                           "tile_id","order_id","orbit","provider",
                                                           "instrument","satellite_id","number_of_bands",
@@ -660,7 +660,7 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                     i=i+1
                     with open(mfile,'a') as csvfile:
                         writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                        writer.writerow([id_no,epoch,str(productType),str(tile_id),str(order_id),
+                        writer.writerow([filename.split('.')[0],epoch,str(productType),str(tile_id),str(order_id),
                                          str(orbit),str(provider),str(instrument),str(satellite_id),
                                          number_of_bands,epsg_code,resampling_kernel,number_rows,number_columns,
                                          format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),
@@ -681,7 +681,7 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                  'absfB3', 'absfB4', 'absfB5', 'absfB6', 'absfB7', 'absfB8', 'effbwB1', 'effbwB2', 'effbwB3', 'effbwB4', 'effbwB5', 'effbwB6', 'effbwB7', 'effbwB8'], delimiter=',')
                 writer.writeheader()
             for filename in os.listdir(folder):
-                print filename
+                print(filename)
                 infilename = os.path.join(folder, filename)
                 fsp = filename.split('.')[0]
                 try:
@@ -807,7 +807,7 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                          format(float(effbwb3), '.6f'), format(float(effbwb4), '.6f'), format(float(effbwb5), '.6f'), format(float(effbwb6), '.6f'), format(float(effbwb7), '.6f'), format(float(effbwb8), '.6f')])
                     csvfile.close()
                 except Exception as e:
-                    print infilename
+                    print(infilename)
                     print(e)
                     with open(errorlog, 'wb') as csvfile:
                         writer = csv.writer(csvfile, delimiter=',')
@@ -819,7 +819,7 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                 writer = csv.DictWriter(csvfile, fieldnames=['id_no', 'satName', 'prodID', 'catID', 'satID', 'stripID', 'numBands', 'cloudcover', 'system:time_start'], delimiter=',')
                 writer.writeheader()
             for filename in os.listdir(folder):
-                print filename
+                print(filename)
                 infilename = os.path.join(folder, filename)
                 fsp = filename.split('.')[0]
                 try:
@@ -865,7 +865,7 @@ def metadata(asset,mf,mfile,errorlog,directory=None):
                         writer.writerow([fsp, satname, pid, cid, satid, stripid, bands, cloud[:4], epoch])
                     csvfile.close()
                 except Exception as e:
-                    print infilename
+                    print(infilename)
                     print(e)
                     with open(errorlog, 'wb') as csvfile:
                         writer = csv.writer(csvfile, delimiter=',')

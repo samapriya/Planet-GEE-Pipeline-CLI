@@ -31,16 +31,11 @@ template = {'type': 'FeatureCollection', 'features': [{'type': 'Feature'
             'coordinates': []}}]}
 
 
-def ddownload(
-    infile,
-    item,
-    asset,
-    dirc,
-    start,
-    end,
-    cmin,
-    cmax,
-    ):
+def ddownload(infile,item,asset,dirc,start,end,cmin,cmax):
+    if cmin is None:
+        cmin=0
+    if cmax is None:
+        cmax=100
     try:
         if infile.endswith('.geojson'):
             st = start
@@ -57,8 +52,8 @@ def ddownload(
                             + ' --range cloud_cover lt '
                             + str(ccovermax) + ' --asset-type '
                             + str(asset) + ' --dest ' + '"' + dirc
-                            + '"', shell=True)            
-        elif infile.endswith('.json'):           
+                            + '"', shell=True)
+        elif infile.endswith('.json'):
             with open(infile) as aoi:
                 aoi_resp = json.load(aoi)
                 for items in aoi_resp['config']:
@@ -100,4 +95,4 @@ def ddownload(
                                     + str(asset) + ' --dest ' + '"' + dirc
                                     + '"', shell=True)
     except Exception, e:
-        print e
+        print(e)

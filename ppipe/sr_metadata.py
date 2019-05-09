@@ -35,7 +35,7 @@ def srmeta(indir,mfile,errorlog,folder):
                                                           "number_of_rows","number_of_columns","gsd","cloud_cover","incidence_angle",
                                                           "sun_azimuth","sun_elevation","azimuth_angle","spacecraft_angle","atmospheric_model",
                                                           "aerosol_Model", "aot_method", "aot_std", "aot_used","aot_Status","aot_mean_quality",
-                                                          "luts_version","aot_coverage","aot_source","atmospheric_correction_algorithm"], delimiter=',')        
+                                                          "luts_version","aot_coverage","aot_source","atmospheric_correction_algorithm"], delimiter=',')
                 writer.writeheader()
         for filename in os.listdir(indir):
                 if filename.endswith(".tif"):
@@ -90,7 +90,7 @@ def srmeta(indir,mfile,errorlog,folder):
                         atcoralgo=(conv['atmospheric_correction']['atmospheric_correction_algorithm'])
                         with open(mfile,'a') as csvfile:
                             writer=csv.writer(csvfile,delimiter=',',lineterminator='\n')
-                            writer.writerow([eopfilename+'_SR',epoch,productType,orbit,provider,instrument,satellite_id,bands,epsg_code,resampling_kernel,number_rows,
+                            writer.writerow([filename.split('.')[0],epoch,productType,orbit,provider,instrument,satellite_id,bands,epsg_code,resampling_kernel,number_rows,
                                              number_columns,format(float(gsd),'.2f'),format(float(cloud),'.2f'),format(float(psia),'.4f'),format(float(psilaz),'.2f'),
                                              format(float(psilelv),'.2f'),format(float(psaz),'.2f'),format(float(pssca),'.4f'),str(atmmodel),str(arsm),str(aotmethod),
                                              format(float(aotstd),'.4f'),format(float(aotused),'.4f'),str(aotstat),aotmq,luts,format(float(aotcov),'.4f')

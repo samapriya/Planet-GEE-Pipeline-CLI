@@ -17,11 +17,6 @@ This tool is designed to facilitate moving data from Planet's API into Google Ea
 * [Planet Tools](#planet-tools)
 	* [Planet Key](#planet-key)
 	* [Planet Quota](#planet-quota)
-	* [AOI JSON](#aoi-json)
-	* [IDlist](#idlist)
-	* [Activate or Check Asset](#activate-or-check-asset)
-	* [Check Total size of assets](#check-total-size-of-assets)
-	* [Download Asset](#download-asset)
 	* [Download Async](#download-async)
 	* [Download Saved Searches](#download-saved-searches)
 	* [Metadata Parser](#metadata-parser)
@@ -33,12 +28,7 @@ This tool is designed to facilitate moving data from Planet's API into Google Ea
 	* [Batch uploader](#batch-uploader)
 	* [Asset List](#asset-list)
 	* [Asset Size](#asset-size)
-	* [Earth Engine Asset Report](#earth-engine-asset-report)
 	* [Task Query](#task-query)
-	* [Task Report](#task-report)
-	* [Delete a collection with content](#delete-a-collection-with-content)
-	* [Assets Move](#assets-move)
-	* [Assets Copy](#assets-copy)
 	* [Assets Access](#assets-access)
 	* [Cancel all tasks](#cancel-all-tasks)
 * [Credits](#credits)
@@ -84,29 +74,22 @@ Installation is an optional step; the application can be also run directly by ex
 ## Getting started
 
 As usual, to print help:
+
 ```
 usage: ppipe [-h]
-                {
-                ,planetkey,pquota,aoijson,idlist,activatepl,space,downloadpl,dasync,savedsearch,metadata,ee_user,quota,create,upload,lst,ee_report,assetsize,tasks,taskreport,delete,mover,copy,access,collprop,cancel}
-                ...
+             {
+             ,planetkey,pquota,dasync,savedsearch,metadata,update,ee_user,quota,create,selupload,lst,assetsize,tasks,access,cancel}
+             ...
 
 Planet Pipeline with Google Earth Engine Batch Addons
 
 positional arguments:
-  { ,planetkey,pquota,aoijson,idlist,activatepl,space,downloadpl,dasync,savedsearch,metadata,ee_user,quota,create,upload,lst,ee_report,assetsize,tasks,taskreport,delete,mover,copy,access,collprop,cancel}
+  { ,planetkey,pquota,dasync,savedsearch,metadata,update,ee_user,quota,create,selupload,lst,assetsize,tasks,access,cancel}
                         ---------------------------------------
                         -----Choose from Planet Tools Below-----
                         ---------------------------------------
     planetkey           Enter your planet API Key
     pquota              Prints your Planet Quota Details
-    aoijson             Tool to convert KML, Shapefile,WKT,GeoJSON or Landsat
-                        WRS PathRow file to AreaOfInterest.JSON file with
-                        structured query for use with Planet API 1.0
-    idlist              Creates an IDLIST that intersects AOI JSON
-    activatepl          Tool to activate Planet Assets
-    space               Tool to query total download size of activated assets
-                        & local space left for download
-    downloadpl          Tool to download Planet Assets
     dasync              Uses the Planet Client Async Downloader to download
                         Planet Assets: Does not require activation
     savedsearch         Tool to download saved searches from Planet Explorer
@@ -115,38 +98,26 @@ positional arguments:
                         -------------------------------------------
                         ----Choose from Earth Engine Tools Below----
                         -------------------------------------------
+    update              Updates Selenium drivers for firefox [windows or linux
+                        systems]
     ee_user             Get Earth Engine API Key & Paste it back to Command
                         line/shell to change user
     quota               Print Earth Engine total quota and used quota
     create              Allows the user to create an asset collection or
                         folder in Google Earth Engine
-    upload              Batch Asset Uploader.
+    selupload           Batch Asset Uploader for Planet Items & Assets using
+                        Selenium
     lst                 List assets in a folder/collection or write as text
                         file
-    ee_report           Prints a detailed report of all Earth Engine Assets
-                        includes Asset Type, Path,Number of
-                        Assets,size(MB),unit,owner,readers,writers
     assetsize           Prints collection size in Human Readable form & Number
                         of assets
     tasks               Queries current task status
                         [completed,running,ready,failed,cancelled]
-    taskreport          Create a report of all tasks and exports to a CSV file
-    delete              Deletes collection and all items inside. Supports
-                        Unix-like wildcards.
-    mover               Moves all assets from one collection to another
-    copy                Copies all assets from one collection to another:
-                        Including copying from other users if you have read
-                        permission to their assets
-    access              Sets Permissions for Images, Collection or all assets
-                        in EE Folder Example: python ee_permissions.py --mode
-                        "folder" --asset "users/john/doe" --user
-                        "jimmy@doe.com:R"
-    collprop            Sets Overall Properties for Image Collection
+    access              Sets Permissions for items in folder
     cancel              Cancel all running tasks
 
 optional arguments:
   -h, --help            show this help message and exit
-
 ```
 
 To obtain help for a specific functionality, simply call it with _help_ switch, e.g.: `ppipe upload -h`. If you didn't install ppipe, then you can run it just by going to _ppipe_ directory and running `python ppipe.py [arguments go here]`
@@ -178,99 +149,6 @@ This tool prints your Planet quota including allocation name, Total quota, quota
 
 ```
 ppipe pquota
-```
-
-
-### AOI JSON
-The aoijson tab within the toolset allows you to create filters and structure your existing input file to that which can be used with Planet's API. The tool requires inputs with start and end date, along with cloud cover. You can choose from multiple input files types such as KML, Zipped Shapefile, GeoJSON, WKT or even Landsat Tiles based on PathRow numbers. The geo option asks you to select existing files which will be converted into formatted JSON file called aoi.json. If using WRS as an option just type in the 6 digit PathRow combination and it will create a json file for you.
-```
-usage: ppipe.py aoijson [-h] [--start START] [--end END] [--cloud CLOUD]
-                     [--inputfile INPUTFILE] [--geo GEO] [--loc LOC]
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --start START         Start date in YYYY-MM-DD?
-  --end END             End date in YYYY-MM-DD?
-  --cloud CLOUD         Maximum Cloud Cover(0-1) representing 0-100
-  --inputfile INPUTFILE
-                        Choose a kml/shapefile/geojson or WKT file for
-                        AOI(KML/SHP/GJSON/WKT) or WRS (6 digit RowPath
-                        Example: 023042)
-  --geo GEO             map.geojson/aoi.kml/aoi.shp/aoi.wkt file
-  --loc LOC             Location where aoi.json file is to be stored
-```
-
-### IDlist
-It is not possible to call the tool on an idlist instead of using a JSON , this option is useful when you want when you want to use the same item ID with different asset types quickly. For example the item ID for PSScene4Band analytic and PSScene4Band analytic_sr is the same. This is a quicker way to parse different asset type and create an IDlist for activation and download.
-```
-usage: ppipe idlist [-h] [--aoi AOI] [--item ITEM] [--asset ASSET]
-                    [--number NUMBER]
-
-optional arguments:
-  -h, --help       show this help message and exit
-  --aoi AOI        Choose aoi.json file created earlier
-  --item ITEM      choose between Planet Item types
-                   PSOrthoTile|PSScene4Band|PSScene3Band|REOrthoTile
-  --asset ASSET    Choose between Planet asset types
-                   analytic|analytic_dn|visual
-  --number NUMBER  Maximum number of assets for the idlist
-```
-
-### Activate or Check Asset
-The activatepl tab allows the users to either check or activate planet assets, in this case only PSOrthoTile and REOrthoTile are supported because I was only interested in these two asset types for my work but can be easily extended to other asset types. This tool makes use of an existing json file sturctured for use within Planet API or the aoi.json file created earlier
-```
-usage: ppipe activatepl [-h] [--asset ASSET] [--aoi AOI]
-
-optional arguments:
-  -h, --help     show this help message and exit
-  --asset ASSET  Choose between planet asset types (PSOrthoTile
-                 analytic/PSOrthoTile analytic_dn/PSOrthoTile
-                 visual/PSScene4Band analytic/PSScene4Band
-                 analytic_dn/PSScene3Band analytic/PSScene3Band
-                 analytic_dn/PSScene3Band visual/REOrthoTile
-                 analytic/REOrthoTile visual
-
-Optional named arguments:
-  --aoi AOI      Choose aoi.json file created earlier
-```
-
-### Check Total size of assets
-It is important to sometimes estimate the overall size of download before you can actually download activated assets. This tool allows you to estimate local storage available at any location and overall size of download in MB or GB. This tool makes use of an existing url get request to look at content size and estimate overall download size of download for the activated assets.
-```
-usage: ppipe space [-h] [--aoi AOI] [--local LOCAL] [--asset ASSET]
-
-optional arguments:
-  -h, --help     show this help message and exit
-  --aoi AOI      Choose aoi.json file created earlier
-  --local LOCAL  local path where you are downloading assets
-  --asset ASSET  Choose between planet asset types (PSOrthoTile
-                 analytic/PSOrthoTile analytic_dn/PSOrthoTile
-                 visual/PSScene4Band analytic/PSScene4Band
-                 analytic_dn/PSScene3Band analytic/PSScene3Band
-                 analytic_dn/PSScene3Band visual/REOrthoTile
-                 analytic/REOrthoTile visual
-```
-
-### Download Asset
-Having metadata helps in organising your asstets, but is not mandatory - you can skip it.
-The downloadpl tab allows the users to download assets. The platform can download Asset or Asset_XML which is the metadata file to desired folders.One again I was only interested in these two asset types(PSOrthoTile and REOrthoTile) for my work but can be easily extended to other asset types. If you don't provide an aoi.json file created earlier, the command uses the idlist created.
-```
-usage: ppipe downloadpl [-h] [--asset ASSET] [--local LOCAL] [--aoi AOI]
-
-optional arguments:
-  -h, --help     show this help message and exit
-  --asset ASSET  Choose between planet asset types or for Metadata follow by
-                 _xml Eg: PSOrthoTile analytic_xml--->Assets
-                 Include:(PSOrthoTile analytic/PSOrthoTile
-                 analytic_dn/PSOrthoTile visual/PSScene4Band
-                 analytic/PSScene4Band analytic_dn/PSScene3Band
-                 analytic/PSScene3Band analytic_dn/PSScene3Band
-                 visual/REOrthoTile analytic/REOrthoTile visual
-  --local LOCAL  Local Pathways where PlanetAssets are saved exampled
-                 ./PlanetScope ./RapidEye
-
-Optional named arguments:
-  --aoi AOI      Choose aoi.json file created earlier
 ```
 
 ### Download Async
@@ -446,20 +324,6 @@ optional arguments:
   --asset ASSET  Earth Engine Asset for which to get size properties
 ```
 
-### Earth Engine Asset Report
-This tool recursively goes through all your assets(Includes Images, ImageCollection,Table,) and generates a report containing the following fields
-[Type,Asset Type, Path,Number of Assets,size(MB),unit,owner,readers,writers].
-
-```
-usage: ppipe ee_report [-h] --outfile OUTFILE
-
-optional arguments:
-  -h, --help         show this help message and exit
-  --outfile OUTFILE  This it the location of your report csv file
-```
-A simple setup is the following
-``` ppipe ee_report --outfile "C:\johndoe\report.csv"```
-
 ### Task Query
 This script counts all currently running,ready,completed,failed and cancelled tasks along with failed tasks. This is linked to the account you initialized with your google earth engine account. This takes no argument.
 ```
@@ -469,69 +333,6 @@ optional arguments:
   -h, --help  show this help message and exit
 
 ppipe.py tasks
-```
-
-### Task Report
-Sometimes it is important to generate a report based on all tasks that is running or has finished. Generated report includes taskId, data time, task status and type
-```
-usage: ppipe.py taskreport [-h] [--r R]
-
-optional arguments:
-  -h, --help  show this help message and exit
-  --r R       Path to csv report file
-```
-
-### Delete a collection with content
-
-The delete is recursive, meaning it will delete also all children assets: images, collections and folders. Use with caution!
-```
-usage: ppipe delete [-h] id
-
-positional arguments:
-  id          Full path to asset for deletion. Recursively removes all
-              folders, collections and images.
-
-optional arguments:
-  -h, --help  show this help message and exit
-```
-
-Typical usage would be
-```
-ppipe delete users/johndoe/test
-```
-
-Console output:
-```
-2016-07-17 16:14:09,212 :: oauth2client.client :: INFO :: Attempting refresh to obtain initial access_token
-2016-07-17 16:14:09,213 :: oauth2client.client :: INFO :: Refreshing access_token
-2016-07-17 16:14:10,842 :: root :: INFO :: Attempting to delete collection test
-2016-07-17 16:14:16,898 :: root :: INFO :: Collection users/johndoe/test removed
-```
-
-### Assets Move
-This script allows us to recursively move assets from one collection to the other.
-```
-usage: ppipe mover [-h] [--assetpath ASSETPATH] [--finalpath FINALPATH]
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --assetpath ASSETPATH
-                        Existing path of assets
-  --finalpath FINALPATH
-                        New path for assets
-ppipe mover --assetpath "users/johndoe/myfolder/myponycollection" --destination "users/johndoe/myfolder/myotherponycollection"
-```
-
-### Assets Copy
-This script allows us to recursively copy assets from one collection to the other. If you have read acess to assets from another user this will also allow you to copy assets from their collections.
-```
-usage: ppipe copy [-h] [--initial INITIAL] [--final FINAL]
-
-optional arguments:
-  -h, --help         show this help message and exit
-  --initial INITIAL  Existing path of assets
-  --final FINAL      New path for assets
-ppipe mover --initial "users/johndoe/myfolder/myponycollection" --final "users/johndoe/myfolder/myotherponycollection"
 ```
 
 ### Assets Access
@@ -571,6 +372,13 @@ Original upload function adapted from [Lukasz's asset manager tool](https://gith
 
 
 # Changelog
+
+### v0.4.4
+- Fixed selenium download path
+- Streamlined overall functions of the tool
+- Handles metadata for clipped assets (use [porder](https://github.com/samapriya/porder) to clip)
+- Updated selenium uploader to function with earthengine-api
+- Overall improvements and stability check
 
 ### v0.4.3
 - Added selenium uploader to upload images to Earth Engine after auth issues
