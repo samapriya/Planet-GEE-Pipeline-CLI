@@ -8,7 +8,8 @@
 
 This tool is designed to facilitate moving data from Planet's API into Google Earth Engine and using a metadata library. The tool downloads data into a local storage and allows you to process the metadata before uploading into Google Earth Engine. This tool has been updated to account for metadata property type by going through each metadata column and then uses the **upload manifest** function to upload images for ingestion to EE. This tool also draws from an additional tool I created with is the [Google Earth Engine Asset Manager Addon](https://github.com/samapriya/gee_asset_manager_addon) This includes the batch upload feature, but now additional tools such as generating reports of Earth Engine assets and querying quota to name just a few. The ambition is apart from helping users with batch actions on assets along with interacting and extending capabilities of existing GEE CLI. It is developed case by case basis to include more features in the future as it becomes available or as the need arises. I have now released this as a [PyPI package](https://pypi.org/project/ppipe/) for easy installation and this will be updated along with the the GitHub package.
 
-![CLI](https://i.imgur.com/qTBnQOk.gif)
+![ppipe_main](https://user-images.githubusercontent.com/6677629/57460065-6f2ae180-7242-11e9-864a-fd327edee950.png)
+
 
 ## Table of contents
 * [Installation](#installation)
@@ -177,16 +178,22 @@ Optional named arguments:
 ```
 A setup using geojson needs to include other filters too and a typical setup would be
 
-```ppipe dasync --infile "C:\Users\johndoe\geometry.geojson" --item "PSScene4Band" --asset "analytic" --local "C:\planet" --start "2018-06-01" --end "2018-08-01" --cmin 0 --cmax 0.4```
+```
+ppipe dasync --infile "C:\Users\johndoe\geometry.geojson" --item "PSScene4Band" --asset "analytic" --local "C:\planet" --start "2018-06-01" --end "2018-08-01" --cmin 0 --cmax 0.4
+```
 
 Using a stuctured json file that you might have created earlier means you don't have to pass additional filters everytime
 
-```python ppipe.py dasync --infile "C:\Users\johndoe\geometry.json" --item "PSScene4Band" --asset "analytic_xml" --local "C:\planet_demo"```
+```
+python ppipe.py dasync --infile "C:\Users\johndoe\geometry.json" --item "PSScene4Band" --asset "analytic_xml" --local "C:\planet_demo"
+```
 
 However, you can still decide to pass the filters and the filters you pass will overwrite existing filters
 
-```python ppipe.py dasync --infile "C:\Users\johndoe\geometry.json" --item "PSScene4Band" --asset "analytic_xml" --local "C:\planet_demo" --start "2018-06-01" --end "2018-08-01" --cmin "0" --cmax 0.4
 ```
+python ppipe.py dasync --infile "C:\Users\johndoe\geometry.json" --item "PSScene4Band" --asset "analytic_xml" --local "C:\planet_demo" --start "2018-06-01" --end "2018-08-01" --cmin "0" --cmax 0.4
+```
+
 ### Download Saved Searches
 Download assets from saved searches which are saved in your planet explorer.
 
