@@ -380,6 +380,10 @@ Original upload function adapted from [Lukasz's asset manager tool](https://gith
 
 # Changelog
 
+### v0.4.6
+- added fix for downloading selenium drivers
+- improved error handling
+
 ### v0.4.4
 - Fixed selenium download path
 - Streamlined overall functions of the tool

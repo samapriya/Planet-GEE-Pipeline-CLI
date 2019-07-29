@@ -94,5 +94,5 @@ def ddownload(infile,item,asset,dirc,start,end,cmin,cmax):
                                     + str(ccovermax) + ' --asset-type '
                                     + str(asset) + ' --dest ' + '"' + dirc
                                     + '"', shell=True)
-    except Exception, e:
+    except Exception as e:
         print(e)
