@@ -8,8 +8,7 @@
 
 This tool is designed to facilitate moving data from Planet's API into Google Earth Engine and using a metadata library. The tool downloads data into a local storage and allows you to process the metadata before uploading into Google Earth Engine. This tool has been updated to account for metadata property type by going through each metadata column and then uses the **upload manifest** function to upload images for ingestion to EE. This tool also draws from an additional tool I created with is the [Google Earth Engine Asset Manager Addon](https://github.com/samapriya/gee_asset_manager_addon) This includes the batch upload feature, but now additional tools such as generating reports of Earth Engine assets and querying quota to name just a few. The ambition is apart from helping users with batch actions on assets along with interacting and extending capabilities of existing GEE CLI. It is developed case by case basis to include more features in the future as it becomes available or as the need arises. I have now released this as a [PyPI package](https://pypi.org/project/ppipe/) for easy installation and this will be updated along with the the GitHub package.
 
-![ppipe_main](https://user-images.githubusercontent.com/6677629/57460065-6f2ae180-7242-11e9-864a-fd327edee950.png)
-
+Though this tool is designed to download planet imagery, use [porder](https://github.com/samapriya/porder) to use the new ordersv2 API to download planet imagery. This includes additional filter capabilities along with capability to clip and download.
 
 ## Table of contents
 * [Installation](#installation)
@@ -23,6 +22,7 @@ This tool is designed to facilitate moving data from Planet's API into Google Ea
 	* [Metadata Parser](#metadata-parser)
 * [Earth Engine Tools](#earth-engine-tools)
     * [selenium update](#selenium-update)
+    * [gee selsetup](#gee-selsetup)
 	* [EE User](#ee-user)
 	* [EE Quota](#ee-quota)
 	* [Create](#create)
@@ -77,15 +77,16 @@ Installation is an optional step; the application can be also run directly by ex
 As usual, to print help:
 
 ```
+> ppipe -h
 usage: ppipe [-h]
              {
-             ,planetkey,pquota,dasync,savedsearch,metadata,update,ee_user,quota,create,selupload,lst,assetsize,tasks,access,cancel}
+             ,planetkey,pquota,dasync,savedsearch,metadata,update,selsetup,ee_user,quota,create,selupload,lst,assetsize,tasks,access,ca
              ...
 
 Planet Pipeline with Google Earth Engine Batch Addons
 
 positional arguments:
-  { ,planetkey,pquota,dasync,savedsearch,metadata,update,ee_user,quota,create,selupload,lst,assetsize,tasks,access,cancel}
+  { ,planetkey,pquota,dasync,savedsearch,metadata,update,selsetup,ee_user,quota,create,selupload,lst,assetsize,tasks,access,cancel}
                         ---------------------------------------
                         -----Choose from Planet Tools Below-----
                         ---------------------------------------
@@ -99,8 +100,9 @@ positional arguments:
                         -------------------------------------------
                         ----Choose from Earth Engine Tools Below----
                         -------------------------------------------
-    update              Updates Selenium drivers for firefox [windows or linux
-                        systems]
+    update              Updates Selenium drivers for firefox
+    selsetup            Non headless setup for new google account, use if
+                        upload throws errors
     ee_user             Get Earth Engine API Key & Paste it back to Command
                         line/shell to change user
     quota               Print Earth Engine total quota and used quota
@@ -247,6 +249,11 @@ The ambition is apart from helping user with batch actions on assets along with 
 
 ``` ppipe update```
 
+### gee selsetup
+Once in a while the geckodriver requires manual input before signing into the google earth engine, this tool will allow you to interact with the initialization of Google Earth Engine code editor window. It allows the user to specify the account they want to use, and should only be needed once.
+
+```geeup selsetup```
+
 ### EE User
 This tool is designed to allow different users to change earth engine authentication credentials. The tool invokes the authentication call and copies the authentication key verification website to the clipboard which can then be pasted onto a browser and the generated key can be pasted back. This command takes in no arguments.
 
@@ -379,6 +386,13 @@ Original upload function adapted from [Lukasz's asset manager tool](https://gith
 
 
 # Changelog
+
+### v0.4.7
+- Download selenium drivers for all operating systems
+- updated asset size, acl changer and other tools
+- fixed metadata tool to work with python3
+- overall general improvements to the tool and updates
+- added selenium setup tools
 
 ### v0.4.6
 - added fix for downloading selenium drivers

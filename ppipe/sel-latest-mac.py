@@ -1,10 +1,11 @@
 from bs4 import BeautifulSoup
-import requests, csv, zipfile, os, platform
+import requests, csv, zipfile, os, platform, tarfile
 from pathlib import Path
 from pySmartDL import SmartDL
 
 sysinfo = platform.machine()[-2:]
-comb = "win" + str(sysinfo) + ".zip"
+# comb="win"+str(sysinfo)+".zip"
+comb = "macos.tar.gz"
 directory = os.path.dirname(os.path.realpath(__file__))
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
@@ -28,18 +29,18 @@ def geckodown(directory):
         obj = SmartDL(url, dest)
         obj.start()
         path = obj.get_dest()
-        print(os.path.join(directory, "geckodriver-" + vr + "-win64.zip"))
-        archive = zipfile.ZipFile(
-            os.path.join(directory, "geckodriver-" + vr + "-" + comb)
-        )
-        for files in archive.namelist():
-            archive.extractall(directory)
-        print("Use selenium driver path as " + str(directory))
+        print(os.path.join(directory, "geckodriver-" + vr + "-linux64.zip"))
+        filepath = os.path.join(directory, "geckodriver-" + vr + "-" + comb)
+        if filepath.endswith("tar.gz"):
+            tar = tarfile.open(filepath, "r:*")
+            tar.extractall(directory)
+            tar.close()
+            # print "Extracted in Current Directory"
+            print(
+                "Use selenium driver path as " + os.path.join(directory, "geckodriver")
+            )
     except Exception as e:
         print("Issues updating with error " + str(e))
 
 
 geckodown(directory=directory)
-# print(match.li.strong)
-
-# print(match.find('li',class_='strong'))
