@@ -2,13 +2,22 @@
 
 [![PyPI version](https://badge.fury.io/py/ppipe.svg)](https://badge.fury.io/py/ppipe)
 ![Build Status](https://img.shields.io/badge/dynamic/json.svg?label=downloads&url=https%3A%2F%2Fpypistats.org%2Fapi%2Fpackages%2Fppipe%2Frecent%3Fperiod%3Dmonth&query=%24.data.last_month&colorB=blue&suffix=%2fmonth)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1316886.svg)](https://doi.org/10.5281/zenodo.1316886)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3473795.svg)](https://doi.org/10.5281/zenodo.3473795)
 [![Planet](https://img.shields.io/badge/SupportedBy%3A-Planet%20Ambassador%20Program-brightgreen.svg)](https://www.planet.com/markets/education-and-research/)
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/samapriya)
 
 This tool is designed to facilitate moving data from Planet's API into Google Earth Engine and using a metadata library. The tool downloads data into a local storage and allows you to process the metadata before uploading into Google Earth Engine. This tool has been updated to account for metadata property type by going through each metadata column and then uses the **upload manifest** function to upload images for ingestion to EE. This tool also draws from an additional tool I created with is the [Google Earth Engine Asset Manager Addon](https://github.com/samapriya/gee_asset_manager_addon) This includes the batch upload feature, but now additional tools such as generating reports of Earth Engine assets and querying quota to name just a few. The ambition is apart from helping users with batch actions on assets along with interacting and extending capabilities of existing GEE CLI. It is developed case by case basis to include more features in the future as it becomes available or as the need arises. I have now released this as a [PyPI package](https://pypi.org/project/ppipe/) for easy installation and this will be updated along with the the GitHub package.
 
 Though this tool is designed to download planet imagery, use [porder](https://github.com/samapriya/porder) to use the new ordersv2 API to download planet imagery. This includes additional filter capabilities along with capability to clip and download.
+
+**Please note: This tool is in no way an official tool or Planet offering, but is a personal project created and maintained by Samapriya Roy**
+
+If you use this tool to download data for your research, and find this tool useful, star and cite it as below
+
+```
+Samapriya Roy. (2019, October 5). samapriya/Planet-GEE-Pipeline-CLI: Planet-GEE-Pipeline-CLI (Version 0.4.7). Zenodo.
+http://doi.org/10.5281/zenodo.3473795
+```
 
 ## Table of contents
 * [Installation](#installation)
