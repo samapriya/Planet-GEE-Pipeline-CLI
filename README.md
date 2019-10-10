@@ -2,7 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/ppipe.svg)](https://badge.fury.io/py/ppipe)
 ![Build Status](https://img.shields.io/badge/dynamic/json.svg?label=downloads&url=https%3A%2F%2Fpypistats.org%2Fapi%2Fpackages%2Fppipe%2Frecent%3Fperiod%3Dmonth&query=%24.data.last_month&colorB=blue&suffix=%2fmonth)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3473795.svg)](https://doi.org/10.5281/zenodo.3473795)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3479525.svg)](https://doi.org/10.5281/zenodo.3479525)
 [![Planet](https://img.shields.io/badge/SupportedBy%3A-Planet%20Ambassador%20Program-brightgreen.svg)](https://www.planet.com/markets/education-and-research/)
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/samapriya)
 
@@ -15,8 +15,8 @@ Though this tool is designed to download planet imagery, use [porder](https://gi
 If you use this tool to download data for your research, and find this tool useful, star and cite it as below
 
 ```
-Samapriya Roy. (2019, October 5). samapriya/Planet-GEE-Pipeline-CLI: Planet-GEE-Pipeline-CLI (Version 0.4.7). Zenodo.
-http://doi.org/10.5281/zenodo.3473795
+Samapriya Roy. (2019, October 10). samapriya/Planet-GEE-Pipeline-CLI: Planet-GEE-Pipeline-CLI (Version 0.4.8). Zenodo.
+http://doi.org/10.5281/zenodo.3479525
 ```
 
 ## Table of contents
