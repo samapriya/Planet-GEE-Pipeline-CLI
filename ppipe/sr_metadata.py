@@ -30,7 +30,7 @@ def srmeta(indir, mfile, errorlog, folder):
     path, dirs, files = next(os.walk(folder))
     file_count = len(files)
     i = 1
-    with open(mfile, "wb") as csvfile:
+    with open(mfile, "w") as csvfile:
         writer = csv.DictWriter(
             csvfile,
             fieldnames=[
