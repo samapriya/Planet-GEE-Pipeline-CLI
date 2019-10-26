@@ -22,7 +22,7 @@ def readme():
 
 setuptools.setup(
     name="ppipe",
-    version="0.4.8",
+    version="0.4.9",
     packages=find_packages(),
     package_data={"ppipe": ["logconfig.json", "aoi.json", "wrs_grid.csv"]},
     url="https://github.com/samapriya/Planet-GEE-Pipeline-CLI",

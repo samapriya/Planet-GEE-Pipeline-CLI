@@ -396,6 +396,9 @@ Original upload function adapted from [Lukasz's asset manager tool](https://gith
 
 # Changelog
 
+### v0.4.9
+- fixed issue with selsetup
+
 ### v0.4.8
 - fixed raw_input vs input for py2 and py3 cases
 - updated selenium setup path for windows vs other operating systems
